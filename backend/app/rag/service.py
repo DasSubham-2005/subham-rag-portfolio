@@ -1,4 +1,6 @@
 from pathlib import Path
+import os
+os.environ["ANONYMIZED_TELEMETRY"] = "False"
 import chromadb
 from chromadb.utils.embedding_functions import SentenceTransformerEmbeddingFunction
 from app.core.config import settings
