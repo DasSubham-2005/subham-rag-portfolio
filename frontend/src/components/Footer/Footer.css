@@ -1,0 +1,123 @@
+footer {
+  padding: 45px 5vw 28px;
+  border-top: 1px solid var(--line);
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 18px;
+  align-items: center;
+  background: #020817;
+}
+footer > div:first-child {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+footer b {
+  font-size: 18px;
+}
+footer span,
+footer small {
+  color: var(--muted);
+  font-size: 11px;
+}
+.footer-links {
+  display: flex;
+  gap: 10px;
+}
+.footer-links a {
+  color: #8ca7c2;
+  padding: 9px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+.footer-links svg {
+  width: 16px;
+}
+footer small {
+  grid-column: 1/-1;
+}
+@media (max-width: 600px) {
+  footer {
+    grid-template-columns: 1fr;
+  }
+  .footer-links {
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 600px) {
+  footer {
+    padding: 35px 15px 22px;
+  }
+  .footer-links {
+    flex-wrap: wrap;
+  }
+}
+
+/* =========================
+   LIGHT THEME — FOOTER
+   ========================= */
+
+html[data-theme="light"] footer {
+  background: #f5f9ff;
+  border-top-color: rgba(30, 90, 140, 0.16);
+}
+
+html[data-theme="light"] footer b {
+  color: #102033;
+}
+
+html[data-theme="light"] footer span,
+html[data-theme="light"] footer small {
+  color: #607b94;
+}
+
+html[data-theme="light"] .footer-links a {
+  color: #526b82;
+  background: rgba(255, 255, 255, 0.72);
+  border-color: rgba(30, 90, 140, 0.16);
+}
+
+html[data-theme="light"] .footer-links a:hover {
+  color: #087dcc;
+  border-color: rgba(8, 125, 204, 0.35);
+  background: rgba(8, 125, 204, 0.06);
+}
+
+/* =========================
+   FOOTER SOCIAL — DARK POLISH
+   ========================= */
+
+.footer-links a {
+  display: grid;
+  place-items: center;
+
+  color: #9fc9e8;
+  background: rgba(10, 32, 55, 0.65);
+  border-color: rgba(72, 176, 235, 0.22);
+
+  transition:
+    color 0.25s ease,
+    border-color 0.25s ease,
+    background 0.25s ease,
+    transform 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+.footer-links a:hover {
+  color: #55c8ff;
+  background: rgba(20, 105, 160, 0.14);
+  border-color: rgba(72, 193, 255, 0.5);
+
+  transform: translateY(-3px);
+
+  box-shadow:
+    0 8px 22px rgba(0, 150, 255, 0.12),
+    0 0 15px rgba(0, 150, 255, 0.08);
+}
+
+.footer-links svg {
+  width: 17px;
+  height: 17px;
+  stroke-width: 2;
+}

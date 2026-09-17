@@ -1,0 +1,787 @@
+/* =========================================================
+   HERO 3D — FUTURISTIC PROFILE VISUAL
+   ========================================================= */
+
+.hero3d {
+  width: 90%;
+  height: 560px;
+
+  position: relative;
+  display: grid;
+  place-items: center;
+
+  overflow: hidden;
+  isolation: isolate;
+
+  /* Keep right edge fixed, create space on LEFT */
+  margin-left: auto;
+  margin-right: 0;
+
+  border-radius: 34px;
+
+  background:
+    radial-gradient(
+      circle at 50% 42%,
+      #0b4e86 0,
+      #06234a 23%,
+      #030d20 55%,
+      transparent 70%
+    ),
+    linear-gradient(145deg, #061a33, #020817);
+
+  border: 1px solid rgba(55, 174, 255, 0.24);
+
+  box-shadow:
+    0 0 70px rgba(0, 136, 255, 0.1),
+    inset 0 0 70px rgba(0, 0, 0, 0.5);
+}
+
+/* =========================================================
+   BACKGROUND GRID
+   ========================================================= */
+
+.hero3d-grid {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+
+  background-image:
+    linear-gradient(rgba(60, 170, 255, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(60, 170, 255, 0.06) 1px, transparent 1px);
+
+  background-size: 45px 45px;
+
+  -webkit-mask-image:
+    linear-gradient(to bottom, transparent, #000 35%, transparent);
+
+  mask-image:
+    linear-gradient(to bottom, transparent, #000 35%, transparent);
+
+  animation: gridDrift 18s linear infinite;
+}
+
+@keyframes gridDrift {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+
+  to {
+    transform: translate3d(0, 45px, 0);
+  }
+}
+
+/* =========================================================
+   CENTRAL PROFILE VISUAL
+   ========================================================= */
+
+.hero3d-photo-wrap {
+  position: relative;
+
+  width: 315px;
+  height: 315px;
+
+  display: grid;
+  place-items: center;
+
+  z-index: 3;
+
+  perspective: 1000px;
+
+  animation: heroPhotoFloat 5s ease-in-out infinite;
+}
+
+/* =========================================================
+   PROFILE PHOTO
+   ========================================================= */
+
+.hero3d-photo {
+  width: 215px;
+  height: 215px;
+
+  object-fit: cover;
+  object-position: center top;
+
+  border-radius: 50%;
+
+  position: relative;
+  z-index: 6;
+
+  border: 3px solid rgba(110, 222, 255, 0.9);
+
+  background: #071a30;
+
+  box-shadow:
+    0 0 18px rgba(55, 198, 255, 0.95),
+    0 0 45px rgba(0, 153, 255, 0.65),
+    0 0 90px rgba(0, 136, 255, 0.38),
+    0 0 150px rgba(0, 136, 255, 0.15);
+
+  animation: photoGlow 3.5s ease-in-out infinite;
+}
+
+/* =========================================================
+   PHOTO INNER GLOW
+   ========================================================= */
+
+.hero3d-photo-wrap::before {
+  content: "";
+
+  position: absolute;
+
+  width: 240px;
+  height: 240px;
+
+  border-radius: 50%;
+
+  background:
+    radial-gradient(
+      circle,
+      rgba(44, 190, 255, 0.32) 0%,
+      rgba(0, 136, 255, 0.15) 38%,
+      transparent 70%
+    );
+
+  filter: blur(10px);
+
+  z-index: 1;
+
+  animation: corePulse 3.5s ease-in-out infinite;
+}
+
+/* =========================================================
+   OUTER ENERGY HALO
+   ========================================================= */
+
+.hero3d-photo-wrap::after {
+  content: "";
+
+  position: absolute;
+
+  width: 275px;
+  height: 275px;
+
+  border-radius: 50%;
+
+  border: 1px solid rgba(69, 204, 255, 0.18);
+
+  box-shadow:
+    0 0 25px rgba(0, 153, 255, 0.12),
+    inset 0 0 30px rgba(0, 153, 255, 0.08);
+
+  z-index: 0;
+
+  animation: haloPulse 4s ease-in-out infinite;
+}
+
+/* =========================================================
+   FALLBACK AI PLACEHOLDER
+   ========================================================= */
+
+.hero3d-placeholder {
+  width: 215px;
+  height: 215px;
+
+  border-radius: 50%;
+
+  display: grid;
+  place-items: center;
+
+  position: relative;
+  z-index: 6;
+
+  background:
+    radial-gradient(
+      circle at 35% 30%,
+      #b7edff,
+      #2294e8 35%,
+      #143a9d 65%,
+      #040b20
+    );
+
+  color: #fff;
+
+  font-size: 44px;
+  font-weight: 900;
+
+  box-shadow:
+    0 0 30px #168eea,
+    0 0 100px rgba(0, 136, 255, 0.45);
+}
+
+/* =========================================================
+   3D ORBIT RINGS
+   ========================================================= */
+
+.hero3d-ring {
+  position: absolute;
+
+  left: 50%;
+  top: 50%;
+
+  border-radius: 50%;
+
+  transform-origin: center;
+
+  pointer-events: none;
+
+  z-index: 4;
+}
+
+/* Main horizontal orbit */
+
+.ring-1 {
+  width: 255px;
+  height: 255px;
+
+  margin-left: -127.5px;
+  margin-top: -127.5px;
+
+  border: 1px solid rgba(77, 200, 255, 0.72);
+
+  box-shadow:
+    0 0 10px rgba(58, 190, 255, 0.25);
+
+  transform: rotateX(68deg) rotateZ(10deg);
+
+  animation: ringRotate1 8s linear infinite;
+}
+
+/* Vertical orbit */
+
+.ring-2 {
+  width: 300px;
+  height: 300px;
+
+  margin-left: -150px;
+  margin-top: -150px;
+
+  border: 1px solid rgba(65, 176, 255, 0.48);
+
+  transform: rotateY(68deg) rotateZ(25deg);
+
+  animation: ringRotate2 11s linear infinite reverse;
+}
+
+/* Large diagonal orbit */
+
+.ring-3 {
+  width: 340px;
+  height: 340px;
+
+  margin-left: -170px;
+  margin-top: -170px;
+
+  border: 1px solid rgba(80, 210, 255, 0.3);
+
+  box-shadow:
+    0 0 20px rgba(0, 153, 255, 0.08);
+
+  transform: rotateX(72deg) rotateZ(-30deg);
+
+  animation: ringRotate3 15s linear infinite;
+}
+
+/* =========================================================
+   ORBIT ROTATIONS
+   ========================================================= */
+
+@keyframes ringRotate1 {
+  from {
+    transform: rotateX(68deg) rotateZ(0deg);
+  }
+
+  to {
+    transform: rotateX(68deg) rotateZ(360deg);
+  }
+}
+
+@keyframes ringRotate2 {
+  from {
+    transform: rotateY(68deg) rotateZ(0deg);
+  }
+
+  to {
+    transform: rotateY(68deg) rotateZ(360deg);
+  }
+}
+
+@keyframes ringRotate3 {
+  from {
+    transform: rotateX(72deg) rotateZ(-30deg);
+  }
+
+  to {
+    transform: rotateX(72deg) rotateZ(330deg);
+  }
+}
+
+/* =========================================================
+   FLOATING TECH CARDS
+   ========================================================= */
+
+.float {
+  position: absolute;
+
+  padding: 14px 18px;
+
+  border: 1px solid rgba(58, 180, 255, 0.45);
+
+  border-radius: 15px;
+
+  background: rgba(2, 18, 37, 0.72);
+
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+
+  color: #82d6ff;
+
+  font-weight: 800;
+
+  box-shadow:
+    0 0 30px rgba(0, 140, 255, 0.15);
+
+  z-index: 8;
+
+  transition:
+    transform 0.3s ease,
+    border-color 0.3s ease,
+    box-shadow 0.3s ease;
+
+  animation: floatingCard 4.5s ease-in-out infinite;
+}
+
+.float:hover {
+  transform: translateY(-5px) scale(1.03);
+
+  border-color: rgba(90, 210, 255, 0.75);
+
+  box-shadow:
+    0 0 35px rgba(0, 153, 255, 0.25);
+}
+
+/* Left AI • ML card */
+
+.f1 {
+  left: 8%;
+  top: 23%;
+
+  animation-delay: -1.5s;
+}
+
+/* Right Learn / Build / Improve card */
+
+.f2 {
+  right: 7%;
+  top: 20%;
+
+  line-height: 1.8;
+
+  animation-delay: -3s;
+}
+
+/* =========================================================
+   FLOATING CARD ANIMATION
+   ========================================================= */
+
+@keyframes floatingCard {
+  0%,
+  100% {
+    transform: translateY(0) translateZ(0);
+  }
+
+  50% {
+    transform: translateY(-10px) translateZ(12px);
+  }
+}
+
+/* =========================================================
+   PHOTO ANIMATIONS
+   ========================================================= */
+
+@keyframes heroPhotoFloat {
+  0%,
+  100% {
+    transform: translateY(0) rotateX(0deg);
+  }
+
+  50% {
+    transform: translateY(-9px) rotateX(1deg);
+  }
+}
+
+@keyframes photoGlow {
+  0%,
+  100% {
+    box-shadow:
+      0 0 18px rgba(55, 198, 255, 0.85),
+      0 0 45px rgba(0, 153, 255, 0.55),
+      0 0 90px rgba(0, 136, 255, 0.32);
+  }
+
+  50% {
+    box-shadow:
+      0 0 25px rgba(75, 215, 255, 1),
+      0 0 60px rgba(0, 153, 255, 0.7),
+      0 0 110px rgba(0, 136, 255, 0.42);
+  }
+}
+
+@keyframes corePulse {
+  0%,
+  100% {
+    transform: scale(0.96);
+    opacity: 0.65;
+  }
+
+  50% {
+    transform: scale(1.08);
+    opacity: 1;
+  }
+}
+
+@keyframes haloPulse {
+  0%,
+  100% {
+    transform: scale(0.96);
+    opacity: 0.45;
+  }
+
+  50% {
+    transform: scale(1.05);
+    opacity: 0.85;
+  }
+}
+
+/* =========================================================
+   LABEL
+   ========================================================= */
+
+.hero3d-label {
+  position: absolute;
+
+  bottom: 25px;
+
+  letter-spacing: 4px;
+
+  font-size: 10px;
+
+  color: #5d91b8;
+
+  z-index: 5;
+
+  text-shadow:
+    0 0 12px rgba(75, 190, 255, 0.25);
+}
+
+/* =========================================================
+   TABLET
+   ========================================================= */
+
+@media (max-width: 900px) {
+  .hero3d {
+    width: 94%;
+    height: 520px;
+  }
+
+  .hero3d-photo-wrap {
+    transform: scale(0.92);
+  }
+
+  .f1 {
+    left: 6%;
+  }
+
+  .f2 {
+    right: 5%;
+  }
+}
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 700px) {
+  .hero3d {
+    width: 100%;
+    height: 350px;
+
+    margin-left: 0;
+    margin-right: 0;
+
+    border-radius: 22px;
+  }
+
+  .hero3d-photo-wrap {
+    width: 225px;
+    height: 225px;
+
+    transform: none;
+  }
+
+  .hero3d-photo,
+  .hero3d-placeholder {
+    width: 185px;
+    height: 185px;
+  }
+
+  .hero3d-photo-wrap::before {
+    width: 205px;
+    height: 205px;
+  }
+
+  .hero3d-photo-wrap::after {
+    width: 220px;
+    height: 220px;
+  }
+
+  .hero3d-ring {
+    width: 210px;
+    height: 210px;
+
+    margin-left: -105px;
+    margin-top: -105px;
+  }
+
+  .ring-2 {
+    width: 235px;
+    height: 235px;
+
+    margin-left: -117.5px;
+    margin-top: -117.5px;
+  }
+
+  .ring-3 {
+    width: 260px;
+    height: 260px;
+
+    margin-left: -130px;
+    margin-top: -130px;
+  }
+
+  .f1 {
+    left: 4%;
+    top: 16%;
+
+    padding: 8px 11px;
+    font-size: 9px;
+  }
+
+  .f2 {
+    right: 4%;
+    top: 15%;
+
+    padding: 9px 11px;
+    font-size: 9px;
+    line-height: 1.45;
+  }
+
+  .hero3d-label {
+    bottom: 14px;
+
+    font-size: 8px;
+    letter-spacing: 2px;
+  }
+}
+
+/* =========================================================
+   SMALL MOBILE
+   ========================================================= */
+
+@media (max-width: 600px) {
+  .hero3d {
+    height: 320px;
+  }
+
+  .hero3d-grid {
+    background-size: 32px 32px;
+  }
+
+  .hero3d-photo-wrap {
+    width: 200px;
+    height: 200px;
+  }
+
+  .hero3d-photo,
+  .hero3d-placeholder {
+    width: 165px;
+    height: 165px;
+  }
+
+  .hero3d-photo-wrap::before {
+    width: 185px;
+    height: 185px;
+  }
+
+  .hero3d-photo-wrap::after {
+    width: 200px;
+    height: 200px;
+  }
+
+  .hero3d-ring {
+    width: 190px;
+    height: 190px;
+
+    margin-left: -95px;
+    margin-top: -95px;
+  }
+
+  .ring-2 {
+    width: 215px;
+    height: 215px;
+
+    margin-left: -107.5px;
+    margin-top: -107.5px;
+  }
+
+  .ring-3 {
+    width: 235px;
+    height: 235px;
+
+    margin-left: -117.5px;
+    margin-top: -117.5px;
+  }
+
+  .f1 {
+    left: 3%;
+    top: 14%;
+  }
+
+  .f2 {
+    right: 3%;
+    top: 13%;
+  }
+
+  .hero3d-label {
+    bottom: 12px;
+  }
+}
+
+/* =========================================================
+   VERY SMALL PHONES
+   ========================================================= */
+
+@media (max-width: 380px) {
+  .hero3d {
+    height: 295px;
+  }
+
+  .hero3d-photo-wrap {
+    width: 180px;
+    height: 180px;
+  }
+
+  .hero3d-photo,
+  .hero3d-placeholder {
+    width: 150px;
+    height: 150px;
+  }
+
+  .hero3d-photo-wrap::before {
+    width: 170px;
+    height: 170px;
+  }
+
+  .hero3d-photo-wrap::after {
+    width: 180px;
+    height: 180px;
+  }
+
+  .hero3d-ring {
+    width: 170px;
+    height: 170px;
+
+    margin-left: -85px;
+    margin-top: -85px;
+  }
+
+  .ring-2 {
+    width: 195px;
+    height: 195px;
+
+    margin-left: -97.5px;
+    margin-top: -97.5px;
+  }
+
+  .ring-3 {
+    width: 215px;
+    height: 215px;
+
+    margin-left: -107.5px;
+    margin-top: -107.5px;
+  }
+
+  .f1 {
+    font-size: 8px;
+    padding: 7px 9px;
+  }
+
+  .f2 {
+    font-size: 8px;
+    padding: 7px 9px;
+  }
+}
+
+/* =========================================================
+   LIGHT THEME
+   ========================================================= */
+
+html[data-theme="light"] .hero3d {
+  background:
+    radial-gradient(
+      circle at 50% 42%,
+      #bfeaff 0,
+      #d9f3ff 23%,
+      #edf7ff 55%,
+      transparent 70%
+    ),
+    linear-gradient(145deg, #e9f7ff, #f7fbff);
+
+  border-color: rgba(8, 125, 204, 0.22);
+
+  box-shadow:
+    0 0 70px rgba(0, 136, 255, 0.12),
+    inset 0 0 70px rgba(40, 110, 160, 0.08);
+}
+
+html[data-theme="light"] .hero3d-grid {
+  background-image:
+    linear-gradient(rgba(8, 125, 204, 0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(8, 125, 204, 0.07) 1px, transparent 1px);
+}
+
+html[data-theme="light"] .float {
+  background: rgba(255, 255, 255, 0.72);
+
+  border-color: rgba(8, 125, 204, 0.28);
+
+  color: #087dcc;
+
+  box-shadow:
+    0 0 25px rgba(0, 140, 255, 0.1);
+}
+
+html[data-theme="light"] .hero3d-label {
+  color: #4d7898;
+}
+
+html[data-theme="light"] .hero3d-photo {
+  border-color: rgba(8, 125, 204, 0.6);
+}
+
+/* =========================================================
+   REDUCED MOTION
+   ========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .hero3d-grid,
+  .hero3d-photo-wrap,
+  .hero3d-photo,
+  .hero3d-photo-wrap::before,
+  .hero3d-photo-wrap::after,
+  .ring-1,
+  .ring-2,
+  .ring-3,
+  .float {
+    animation: none;
+  }
+}

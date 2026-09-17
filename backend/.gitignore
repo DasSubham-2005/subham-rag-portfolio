@@ -1,0 +1,29 @@
+# Environment & secrets
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+
+# Local database / backups
+*.db
+*.sqlite
+*.sqlite3
+
+# Local RAG database
+chroma_db/
+
+# Uploaded files
+uploads/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+

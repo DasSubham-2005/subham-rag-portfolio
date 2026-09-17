@@ -1,0 +1,133 @@
+.timeline {
+  max-width: 900px;
+  margin: 45px auto 0;
+  position: relative;
+}
+.timeline:before {
+  content: "";
+  position: absolute;
+  left: 18px;
+  top: 20px;
+  bottom: 20px;
+  width: 1px;
+  background: linear-gradient(var(--accent), transparent);
+}
+.timeline-item {
+  position: relative;
+  margin-bottom: 18px;
+  padding: 25px 25px 25px 65px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: rgba(5, 22, 39, 0.72);
+}
+.timeline-dot {
+  position: absolute;
+  left: 0;
+  top: 25px;
+  width: 37px;
+  height: 37px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #062447;
+  border: 1px solid #31b5ff;
+  color: #48c1ff;
+}
+.timeline-dot svg {
+  width: 17px;
+}
+.timeline-title {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+}
+.timeline-title h3 {
+  margin: 0;
+  font-size: 17px;
+}
+.timeline-title span {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: #7190ad;
+  font-size: 10px;
+}
+.timeline-title svg {
+  width: 13px;
+}
+.timeline-item > b {
+  display: block;
+  color: #55bfff;
+  font-size: 12px;
+  margin-top: 6px;
+}
+.timeline-item p {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.6;
+}
+@media (max-width: 650px) {
+  .timeline-title {
+    display: block;
+  }
+  .timeline-title span {
+    margin-top: 7px;
+  }
+}
+
+@media (max-width: 600px) {
+  .timeline {
+    margin-top: 30px;
+  }
+  .timeline:before {
+    left: 15px;
+  }
+  .timeline-item {
+    padding: 19px 16px 19px 48px;
+  }
+  .timeline-dot {
+    width: 31px;
+    height: 31px;
+    top: 20px;
+  }
+  .timeline-title h3 {
+    font-size: 15px;
+  }
+  .timeline-item p {
+    font-size: 12px;
+  }
+}
+
+
+html[data-theme="light"] .timeline:before {
+  background: linear-gradient(var(--accent), transparent);
+}
+
+html[data-theme="light"] .timeline-item {
+  background: rgba(255, 255, 255, 0.72);
+  border-color: rgba(30, 90, 140, 0.16);
+  box-shadow: 0 10px 30px rgba(30, 90, 140, 0.05);
+}
+
+html[data-theme="light"] .timeline-dot {
+  background: #eef8ff;
+  border-color: rgba(8, 125, 204, 0.45);
+  color: #087dcc;
+  box-shadow: 0 0 18px rgba(8, 125, 204, 0.10);
+}
+
+html[data-theme="light"] .timeline-title h3 {
+  color: #102033;
+}
+
+html[data-theme="light"] .timeline-title span {
+  color: #607b94;
+}
+
+html[data-theme="light"] .timeline-item > b {
+  color: #087dcc;
+}
+
+html[data-theme="light"] .timeline-item p {
+  color: #526b82;
+}

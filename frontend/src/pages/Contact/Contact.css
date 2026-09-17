@@ -1,0 +1,103 @@
+.contact-page {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 70px;
+  align-items: center;
+}
+.contact-info {
+  display: grid;
+  gap: 13px;
+  margin-top: 28px;
+}
+.contact-info a,
+.contact-info span {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #93afc8;
+  font-size: 12px;
+}
+.contact-info svg {
+  width: 17px;
+  color: #45baff;
+}
+.contact-form {
+  display: grid;
+  gap: 12px;
+  padding: 28px;
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  background: rgba(5, 22, 39, 0.75);
+}
+.contact-form input,
+.contact-form textarea {
+  width: 100%;
+  border: 1px solid rgba(64, 141, 213, 0.25);
+  background: #041121;
+  color: #fff;
+  border-radius: 12px;
+  padding: 13px;
+  outline: 0;
+}
+.contact-form textarea {
+  min-height: 150px;
+  resize: vertical;
+}
+.contact-form button {
+  justify-content: center;
+}
+@media (max-width: 800px) {
+  .contact-page {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .contact-page {
+    gap: 32px;
+  }
+  .contact-form {
+    padding: 20px;
+    border-radius: 18px;
+  }
+  .contact-form textarea {
+    min-height: 125px;
+  }
+}
+
+/* =========================
+   LIGHT THEME — CONTACT
+   ========================= */
+
+html[data-theme="light"] .contact-info a,
+html[data-theme="light"] .contact-info span {
+  color: #526b82;
+}
+
+html[data-theme="light"] .contact-info svg {
+  color: #087dcc;
+}
+
+html[data-theme="light"] .contact-form {
+  background: rgba(255, 255, 255, 0.78);
+  border-color: rgba(30, 90, 140, 0.16);
+  box-shadow: 0 10px 35px rgba(30, 90, 140, 0.06);
+}
+
+html[data-theme="light"] .contact-form input,
+html[data-theme="light"] .contact-form textarea {
+  background: rgba(245, 250, 255, 0.95);
+  color: #102033;
+  border-color: rgba(30, 90, 140, 0.18);
+}
+
+html[data-theme="light"] .contact-form input::placeholder,
+html[data-theme="light"] .contact-form textarea::placeholder {
+  color: #7a91a5;
+}
+
+html[data-theme="light"] .contact-form input:focus,
+html[data-theme="light"] .contact-form textarea:focus {
+  border-color: rgba(8, 125, 204, 0.45);
+  box-shadow: 0 0 15px rgba(8, 125, 204, 0.08);
+}

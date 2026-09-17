@@ -1,0 +1,565 @@
+.admin-login {
+  min-height: calc(100vh - 72px);
+  display: grid;
+  place-items: center;
+  padding: 35px;
+}
+.login-box {
+  width: min(440px, 100%);
+  padding: 38px;
+  border: 1px solid rgba(48, 180, 255, 0.5);
+  border-radius: 25px;
+  background: rgba(4, 18, 34, 0.9);
+  box-shadow: 0 0 75px rgba(0, 130, 255, 0.15);
+  display: grid;
+  gap: 12px;
+  text-align: center;
+}
+.login-box > svg {
+  margin: auto;
+  color: #49c2ff;
+  width: 42px;
+  height: 42px;
+}
+.login-box h1 {
+  margin: 0;
+  font-size: 31px;
+}
+.login-box h1 span {
+  color: #45bdff;
+}
+.login-box p {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.6;
+}
+.login-box input,
+.profile-editor input,
+.profile-editor textarea,
+.editor-box input,
+.editor-box textarea {
+  background: #041121;
+  border: 1px solid rgba(64, 141, 213, 0.25);
+  color: #fff;
+  border-radius: 11px;
+  padding: 12px;
+  outline: 0;
+}
+.login-box small {
+  color: #ff7c8a;
+}
+.admin-shell {
+  min-height: calc(100vh - 72px);
+  display: grid;
+  grid-template-columns: 235px 1fr;
+}
+.admin-shell aside {
+  position: sticky;
+  top: 72px;
+  height: calc(100vh - 72px);
+  padding: 18px 12px;
+  border-right: 1px solid var(--line);
+  background: rgba(3, 13, 27, 0.88);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.admin-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 800;
+  padding: 10px 9px 20px;
+  color: #a7dfff;
+}
+.admin-brand svg {
+  color: #40bdff;
+}
+.admin-shell aside button {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  border: 0;
+  background: transparent;
+  color: #7f9db9;
+  padding: 11px;
+  border-radius: 10px;
+  text-align: left;
+  font-size: 12px;
+}
+.admin-shell aside button svg {
+  width: 16px;
+}
+.admin-shell aside button:hover,
+.admin-shell aside button.active {
+  background: rgba(26, 145, 239, 0.11);
+  color: #fff;
+}
+.admin-shell aside .logout {
+  margin-top: auto;
+  color: #ff8791;
+}
+.admin-main {
+  padding: 35px 4vw 70px;
+}
+.admin-main > header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+}
+.admin-main header span {
+  color: #55bfff;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+.admin-main header h1 {
+  margin: 5px 0;
+  font-size: 34px;
+}
+.admin-main header .btn svg {
+  width: 14px;
+}
+.manager-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+.manager-top p,
+.dash > p {
+  color: var(--muted);
+  font-size: 12px;
+}
+.manager-top .btn svg {
+  width: 15px;
+}
+.admin-message {
+  padding: 11px 14px;
+  border: 1px solid rgba(50, 175, 255, 0.3);
+  background: rgba(20, 139, 230, 0.08);
+  color: #78ceff;
+  border-radius: 11px;
+  font-size: 11px;
+  margin: 15px 0;
+}
+.admin-list {
+  margin-top: 20px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  overflow: hidden;
+  background: rgba(4, 18, 33, 0.65);
+}
+.admin-item {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 15px 18px;
+  border-bottom: 1px solid rgba(70, 140, 205, 0.1);
+}
+.admin-item:last-child {
+  border: 0;
+}
+.admin-item > div:first-child {
+  flex: 1;
+  display: grid;
+  gap: 4px;
+}
+.admin-item b {
+  font-size: 13px;
+}
+.admin-item span {
+  font-size: 10px;
+  color: #7693ae;
+}
+.row-actions {
+  display: flex;
+  gap: 7px;
+}
+.row-actions button {
+  border: 1px solid var(--line);
+  background: #071a2d;
+  color: #8fb0cc;
+  padding: 8px;
+  border-radius: 9px;
+}
+.row-actions svg {
+  width: 14px;
+}
+.row-actions .danger {
+  color: #ff7480;
+}
+.editor-box,
+.profile-editor {
+  margin-top: 20px;
+  padding: 23px;
+  border: 1px solid rgba(49, 159, 238, 0.3);
+  border-radius: 18px;
+  background: rgba(5, 21, 37, 0.75);
+}
+.editor-head {
+  display: flex;
+  justify-content: space-between;
+}
+.editor-head button {
+  background: none;
+  border: 0;
+  color: #91abc3;
+  font-size: 25px;
+}
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.editor-box label,
+.profile-editor label {
+  display: grid;
+  gap: 7px;
+  color: #7696b3;
+  font-size: 10px;
+  margin: 12px 0;
+}
+.editor-box textarea,
+.profile-editor textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+.upload-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.check {
+  display: flex !important;
+  align-items: center;
+  gap: 7px !important;
+}
+.check input {
+  width: auto;
+}
+.editor-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 18px;
+}
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+  margin: 25px 0;
+}
+.stat-grid > div {
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: rgba(5, 22, 39, 0.7);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.stat-grid span {
+  font-size: 10px;
+  color: #7592ae;
+}
+.stat-grid b {
+  font-size: 25px;
+  color: #54c4ff;
+}
+.admin-info {
+  padding: 25px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: linear-gradient(
+    145deg,
+    rgba(10, 38, 65, 0.7),
+    rgba(3, 13, 25, 0.8)
+  );
+  max-width: 800px;
+}
+.admin-info h3 {
+  margin-top: 0;
+}
+.admin-info p {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.7;
+}
+.url-preview {
+  font-size: 10px;
+  color: #6788a5;
+  line-height: 1.8;
+  margin: 10px 0;
+}
+.media-manager {
+  margin-top: 25px;
+}
+.upload-big {
+  position: relative;
+  min-height: 180px;
+  display: grid !important;
+  place-items: center;
+  text-align: center;
+  border: 1px dashed rgba(55, 178, 255, 0.5);
+  border-radius: 20px;
+  background: rgba(9, 34, 57, 0.5);
+  cursor: pointer;
+}
+.upload-big svg {
+  color: #47bfff;
+  width: 32px;
+  height: 32px;
+}
+.upload-big b {
+  font-size: 14px;
+  color: #b8d7ed;
+}
+.upload-big span {
+  font-size: 10px;
+  color: #6d8ba7;
+}
+.upload-big input {
+  position: absolute !important;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+.media-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 13px;
+  margin-top: 20px;
+}
+.media-grid article {
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 15px;
+  background: #051426;
+  display: grid;
+  gap: 7px;
+}
+.media-grid article img {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 9px;
+}
+.media-grid article span {
+  font-size: 9px;
+  color: #4ebfff;
+  text-transform: uppercase;
+}
+.media-grid article b {
+  font-size: 10px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.media-grid article a {
+  font-size: 10px;
+  color: #53c4ff;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.media-grid article a svg {
+  width: 12px;
+}
+.rag-hero {
+  max-width: 750px;
+  padding: 35px;
+  border: 1px solid rgba(52, 177, 255, 0.35);
+  border-radius: 22px;
+  background: linear-gradient(
+    145deg,
+    rgba(8, 36, 63, 0.8),
+    rgba(3, 12, 25, 0.9)
+  );
+}
+.rag-hero > svg {
+  width: 40px;
+  color: #4bc2ff;
+}
+.rag-hero h2 {
+  font-size: 28px;
+}
+.rag-hero p {
+  color: var(--muted);
+  line-height: 1.7;
+  font-size: 12px;
+}
+.rag-hero .btn svg {
+  width: 15px;
+}
+.rag-pipeline {
+  margin-top: 25px;
+  display: flex;
+  gap: 9px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.rag-pipeline span {
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #05182b;
+  color: #8bb0ce;
+  font-size: 10px;
+}
+.rag-pipeline i {
+  color: #42baff;
+}
+.spin {
+  animation: spin 1s linear infinite;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (max-width: 900px) {
+  .admin-shell {
+    grid-template-columns: 1fr;
+  }
+  .admin-shell aside {
+    position: static;
+    height: auto;
+    display: flex;
+    flex-direction: row;
+    overflow: auto;
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .admin-brand {
+    display: none;
+  }
+  .admin-shell aside button {
+    white-space: nowrap;
+  }
+  .admin-shell aside .logout {
+    margin: 0;
+  }
+  .stat-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .media-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (max-width: 600px) {
+  .admin-main {
+    padding: 25px 18px;
+  }
+  .admin-main > header {
+    align-items: flex-start;
+  }
+  .admin-main header h1 {
+    font-size: 27px;
+  }
+  .form-grid,
+  .upload-row {
+    grid-template-columns: 1fr;
+  }
+  .media-grid {
+    grid-template-columns: 1fr;
+  }
+  .stat-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  .manager-top {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
+/* Contact Messages */
+.contact-messages {
+  display: grid;
+  gap: 18px;
+  margin-top: 20px;
+}
+
+.contact-message-card {
+  padding: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.03);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+}
+
+.contact-message-card.unread {
+  border-color: rgba(0, 255, 200, 0.35);
+}
+
+.contact-message-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.contact-message-top h3 {
+  margin: 0 0 8px;
+}
+
+.contact-message-top strong,
+.contact-message-top a {
+  display: block;
+  margin-top: 4px;
+}
+
+.contact-message-top a {
+  color: inherit;
+  opacity: 0.7;
+  text-decoration: none;
+}
+
+.contact-message-top > span {
+  font-size: 12px;
+  opacity: 0.55;
+  white-space: nowrap;
+}
+
+.contact-message-body {
+  margin-top: 18px;
+  padding: 14px;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.15);
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+.contact-message-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.btn.danger {
+  border-color: rgba(255, 80, 80, 0.4);
+}
+
+.empty-state {
+  padding: 50px 20px;
+  text-align: center;
+  opacity: 0.65;
+}
+
+@media (max-width: 700px) {
+  .contact-message-top {
+    flex-direction: column;
+  }
+
+  .contact-message-top > span {
+    white-space: normal;
+  }
+
+  .contact-message-actions {
+    flex-direction: column;
+  }
+
+  .contact-message-actions .btn {
+    width: 100%;
+  }
+}

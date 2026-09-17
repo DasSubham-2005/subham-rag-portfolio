@@ -1,0 +1,236 @@
+.home {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 55px;
+  align-items: center;
+  padding-top: 70px;
+}
+.home-copy h1 {
+  font-size: clamp(50px, 6vw, 82px);
+  letter-spacing: -3px;
+  line-height: 1;
+  margin: 20px 0 12px;
+  background: linear-gradient(90deg, #fff, #70cfff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.home-copy h2 {
+  font-size: 20px;
+  color: #9fdcff;
+  font-weight: 600;
+}
+.home-copy > p {
+  max-width: 620px;
+  color: var(--muted);
+  font-size: 16px;
+  line-height: 1.8;
+}
+.home-actions {
+  display: flex;
+  gap: 12px;
+  margin: 25px 0;
+}
+.home-actions svg,
+.section-head .btn svg {
+  width: 16px;
+}
+.tech-row {
+  display: flex;
+  gap: 9px;
+  flex-wrap: wrap;
+  margin-top: 25px;
+}
+.tech-row span {
+  font-size: 10px;
+  color: #83b0d3;
+  border: 1px solid var(--line);
+  background: rgba(7, 25, 45, 0.6);
+  padding: 8px 10px;
+  border-radius: 9px;
+}
+.home-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  margin-top: 35px;
+  border-top: 1px solid var(--line);
+  padding-top: 25px;
+  gap: 10px;
+}
+.home-stats div {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.home-stats b {
+  color: #5ac5ff;
+  font-size: 17px;
+}
+.home-stats span {
+  font-size: 10px;
+  color: #6f8da9;
+}
+.featured {
+  padding-top: 35px;
+}
+.section-head {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  margin-bottom: 30px;
+}
+.section-head .section-title {
+  margin-bottom: 0;
+}
+.project-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+}
+@media (max-width: 950px) {
+  .home {
+    grid-template-columns: 1fr;
+  }
+  .home-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .project-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+@media (max-width: 600px) {
+  .home {
+    padding-top: 50px;
+  }
+  .home-copy h1 {
+    font-size: 52px;
+  }
+  .project-grid {
+    grid-template-columns: 1fr;
+  }
+  .section-head {
+    align-items: start;
+    gap: 15px;
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 900px) {
+  .home {
+    gap: 35px;
+  }
+  .hero3d {
+    order: -1;
+  }
+  .home-copy > p {
+    font-size: 15px;
+  }
+}
+@media (max-width: 600px) {
+  .home {
+    gap: 25px;
+    padding-top: 38px;
+  }
+  .home-copy h1 {
+    font-size: 48px;
+    letter-spacing: -2px;
+  }
+  .home-copy h2 {
+    font-size: 16px;
+    line-height: 1.5;
+  }
+  .home-copy > p {
+    font-size: 13px;
+    line-height: 1.7;
+  }
+  .tech-row {
+    gap: 6px;
+  }
+  .tech-row span {
+    padding: 7px 8px;
+    font-size: 9px;
+  }
+  .home-stats {
+    gap: 8px;
+    margin-top: 25px;
+    padding-top: 20px;
+  }
+  .home-stats b {
+    font-size: 15px;
+  }
+  .home-stats span {
+    font-size: 9px;
+  }
+}
+/* Resume / Home buttons hover effect */
+.home-actions .btn {
+  transition: all 0.25s ease;
+}
+
+.home-actions .btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 0 20px rgba(0, 255, 200, 0.25);
+  border-color: rgba(52, 156, 230, 0.6);
+}
+
+.home-actions .btn.primary:hover {
+  box-shadow:
+    0 0 20px rgba(0, 255, 200, 0.35),
+    0 0 40px rgba(0, 255, 200, 0.12);
+}
+
+.home-actions .btn:active {
+  transform: translateY(-1px) scale(0.98);
+}
+
+.home-actions .btn:not(.primary):hover {
+  background: rgba(52, 156, 230, 0.08);
+  color: #ffffff;
+  box-shadow:
+    0 0 15px rgba(52, 156, 230, 0.25),
+    inset 0 0 15px rgba(52, 156, 230, 0.05);
+}
+
+
+
+html[data-theme="light"] .home-copy h1 {
+  background: linear-gradient(90deg, #102033, #087dcc);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+html[data-theme="light"] .home-copy h2 {
+  color: #087dcc;
+}
+
+html[data-theme="light"] .home-copy > p {
+  color: #526b82;
+}
+
+html[data-theme="light"] .tech-row span {
+  color: #42647e;
+  background: rgba(255, 255, 255, 0.72);
+  border-color: rgba(30, 90, 140, 0.16);
+}
+
+html[data-theme="light"] .home-stats b {
+  color: #087dcc;
+}
+
+html[data-theme="light"] .home-stats span {
+  color: #607b94;
+}
+
+html[data-theme="light"] .home-actions .btn:not(.primary):hover {
+  color: #087dcc;
+  background: rgba(8, 125, 204, 0.08);
+}
+
+html[data-theme="light"] .section-head .btn {
+  color: #23415c;
+  background: #ffffff;
+}
+
+
+

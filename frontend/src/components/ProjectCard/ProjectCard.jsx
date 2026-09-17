@@ -1,0 +1,5 @@
+import {ArrowUpRight,ExternalLink} from 'lucide-react';
+import {Link} from 'react-router-dom';
+import {asset} from '../../api';
+import './ProjectCard.css';
+export default function ProjectCard({project}){const tags=(project.tech_stack||'').split(',').map(x=>x.trim()).filter(Boolean);return <article className="project-card"><Link to={`/projects/${project.id}`} className="project-thumb">{project.thumbnail_url?<img src={asset(project.thumbnail_url)} alt=""/>:<div className="project-placeholder">AI</div>}{project.video_url&&<span className="video-badge">▶ Video</span>}</Link><div className="project-body"><div className="project-title"><h3>{project.name}</h3><Link to={`/projects/${project.id}`}><ArrowUpRight/></Link></div><p>{project.short_description||project.description}</p><div className="project-tags">{tags.slice(0,5).map(t=><span key={t}>{t}</span>)}</div><div className="project-links">{project.live_url&&<a href={project.live_url} target="_blank" rel="noreferrer"><ExternalLink/>Live</a>}{project.github_url&&<a href={project.github_url} target="_blank" rel="noreferrer">GitHub</a>}</div></div></article>}

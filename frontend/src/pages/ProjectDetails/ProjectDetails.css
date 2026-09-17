@@ -1,0 +1,127 @@
+.detail-page {
+  width: min(1100px, 90vw);
+}
+.back {
+  display: inline-flex;
+  gap: 7px;
+  color: #78b5dd;
+  font-size: 12px;
+  margin-bottom: 35px;
+}
+.back svg {
+  width: 15px;
+}
+.detail-hero {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 45px;
+  align-items: center;
+}
+.detail-hero > img,
+.detail-placeholder {
+  width: 100%;
+  height: 360px;
+  object-fit: cover;
+  border-radius: 24px;
+  border: 1px solid var(--line);
+  background: radial-gradient(circle, #0a6ca8, transparent 35%), #04152a;
+}
+.detail-placeholder {
+  display: grid;
+  place-items: center;
+  font-size: 70px;
+  font-weight: 900;
+  color: #5bc8ff;
+  box-shadow: 0 0 60px rgba(0, 130, 255, 0.12);
+}
+.detail-hero h1 {
+  font-size: 52px;
+  margin: 18px 0;
+}
+.detail-hero p {
+  color: var(--muted);
+  line-height: 1.8;
+}
+.detail-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+.detail-tags span {
+  font-size: 10px;
+  color: #8fc2e4;
+  padding: 7px 10px;
+  background: #06182b;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+}
+.detail-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 25px;
+}
+.detail-actions svg {
+  width: 14px;
+}
+@media (max-width: 800px) {
+  .detail-hero {
+    grid-template-columns: 1fr;
+  }
+  .detail-hero h1 {
+    font-size: 40px;
+  }
+}
+
+@media (max-width: 600px) {
+  .detail-page {
+    width: calc(100% - 30px);
+  }
+  .detail-hero {
+    gap: 25px;
+  }
+  .detail-hero > img,
+  .detail-placeholder {
+    height: 230px;
+    border-radius: 18px;
+  }
+  .detail-hero h1 {
+    font-size: 34px;
+    line-height: 1.1;
+  }
+  .detail-hero p {
+    font-size: 13px;
+  }
+  .back {
+    margin-bottom: 20px;
+  }
+}
+
+
+
+html[data-theme="light"] .back {
+  color: #087dcc;
+}
+
+html[data-theme="light"] .detail-hero > img,
+html[data-theme="light"] .detail-placeholder {
+  background:
+    radial-gradient(circle, #bfeaff, transparent 35%),
+    #eef8ff;
+  border-color: rgba(8, 125, 204, 0.18);
+}
+
+html[data-theme="light"] .detail-placeholder {
+  color: #087dcc;
+  box-shadow: 0 0 60px rgba(0, 130, 255, 0.08);
+}
+
+html[data-theme="light"] .detail-hero h1 {
+  color: #102033;
+}
+
+html[data-theme="light"] .detail-tags span {
+  color: #42647e;
+  background: rgba(255, 255, 255, 0.75);
+  border-color: rgba(30, 90, 140, 0.16);
+}

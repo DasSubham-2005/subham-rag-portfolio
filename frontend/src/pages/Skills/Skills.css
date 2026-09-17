@@ -1,0 +1,504 @@
+.skills-section {
+  overflow: hidden;
+  position: relative;
+}
+.skills-heading {
+  position: relative;
+  z-index: 3;
+}
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.skills-stage {
+  height: 430px;
+  max-width: 1120px;
+  margin: 34px auto 12px;
+  position: relative;
+  perspective: 1200px;
+  isolation: isolate;
+  overflow: hidden;
+  border-radius: 30px;
+}
+
+.stage-grid {
+  position: absolute;
+  inset: 8% 12%;
+  border: 1px solid rgba(55, 169, 235, 0.08);
+  border-radius: 50%;
+  transform: rotateX(67deg);
+  background: radial-gradient(
+    ellipse at center,
+    rgba(28, 130, 207, 0.08),
+    transparent 63%
+  );
+  box-shadow: 0 0 90px rgba(0, 145, 255, 0.07);
+}
+.stage-grid:before,
+.stage-grid:after {
+  content: "";
+  position: absolute;
+  inset: 12%;
+  border: 1px solid rgba(55, 169, 235, 0.07);
+  border-radius: 50%;
+}
+.stage-grid:after {
+  transform: rotateZ(90deg);
+}
+.stage-glow {
+  position: absolute;
+  width: 300px;
+  height: 300px;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(40, 173, 255, 0.2) 0,
+    rgba(40, 173, 255, 0.08) 28%,
+    transparent 68%
+  );
+  filter: blur(5px);
+  z-index: 0;
+}
+.stage-core {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 94px;
+  height: 94px;
+  transform: translate(-50%, -50%) translateZ(50px);
+  border: 1px solid rgba(69, 193, 255, 0.38);
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(
+    circle at 35% 30%,
+    rgba(48, 173, 255, 0.24),
+    rgba(3, 18, 34, 0.92) 68%
+  );
+  box-shadow:
+    0 0 30px rgba(27, 165, 255, 0.2),
+    inset 0 0 24px rgba(55, 181, 255, 0.08);
+  z-index: 2;
+  animation: corePulse 3.5s ease-in-out infinite;
+}
+.stage-core span {
+  font-weight: 900;
+  font-size: 23px;
+  color: #e8f7ff;
+  letter-spacing: 0.08em;
+}
+.stage-core small {
+  font-size: 7px;
+  letter-spacing: 0.25em;
+  color: #51c8ff;
+  margin-top: 3px;
+}
+
+.orbit-line {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  border: 1px solid rgba(55, 183, 255, 0.13);
+  border-radius: 50%;
+  pointer-events: none;
+}
+.orbit-line-a {
+  width: 760px;
+  height: 210px;
+  transform: translate(-50%, -50%) rotateX(68deg) rotateZ(-8deg);
+}
+.orbit-line-b {
+  width: 440px;
+  height: 340px;
+  transform: translate(-50%, -50%) rotateY(68deg) rotateZ(14deg);
+}
+
+.floating-skill {
+  position: absolute;
+  left: var(--left);
+  top: var(--top);
+  width: 164px;
+  height: 58px;
+  z-index: 3;
+  animation: skillLift 4.6s ease-in-out infinite;
+  animation-delay: var(--delay);
+  will-change: margin-top;
+}
+.skill-card-3d {
+  height: 58px;
+  width: 164px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 0 15px;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(76, 195, 255, 0.32);
+  border-radius: 16px;
+  background: linear-gradient(
+    145deg,
+    rgba(8, 34, 58, 0.96),
+    rgba(3, 14, 28, 0.92)
+  );
+  box-shadow:
+    0 13px 28px rgba(0, 0, 0, 0.28),
+    0 0 22px rgba(19, 155, 255, 0.1),
+    inset 1px 1px 0 rgba(255, 255, 255, 0.07);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  transform: translateZ(var(--depth)) rotateX(4deg) rotateY(-5deg);
+  transition: 0.25s ease;
+}
+.skill-card-3d:hover {
+  transform: translateZ(var(--depth)) translateY(-5px) rotateX(4deg)
+    rotateY(-5deg) scale(1.04);
+  border-color: rgba(80, 201, 255, 0.65);
+  box-shadow:
+    0 18px 34px rgba(0, 0, 0, 0.32),
+    0 0 28px rgba(19, 165, 255, 0.22);
+}
+.skill-icon {
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  flex: none;
+  border-radius: 9px;
+  background: rgba(32, 166, 235, 0.1);
+  border: 1px solid rgba(75, 190, 255, 0.18);
+  color: #58caff;
+  box-shadow: 0 0 13px rgba(62, 190, 255, 0.12);
+}
+.skill-icon svg {
+  width: 17px;
+  height: 17px;
+}
+.skill-name {
+  font-size: 12px;
+  font-weight: 800;
+  color: #d9efff;
+  white-space: nowrap;
+}
+.skill-shine {
+  position: absolute;
+  inset: -40%;
+  background: linear-gradient(
+    110deg,
+    transparent 42%,
+    rgba(255, 255, 255, 0.08) 50%,
+    transparent 58%
+  );
+  transform: translateX(-55%);
+  animation: shine 5.5s ease-in-out infinite;
+  animation-delay: var(--delay);
+  pointer-events: none;
+}
+
+.skill-groups {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 18px;
+  margin-top: 18px;
+}
+.skill-group {
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: rgba(5, 22, 39, 0.52);
+}
+.skill-group-title {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: #a9c7df;
+}
+.skill-group-title svg {
+  width: 18px;
+  color: #56c7ff;
+}
+.skill-group-title h3 {
+  margin: 0;
+  font-size: 13px;
+}
+.skill-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 15px;
+}
+.skill-chip {
+  padding: 8px 11px;
+  border: 1px solid rgba(77, 180, 238, 0.2);
+  border-radius: 999px;
+  background: rgba(17, 48, 74, 0.55);
+  color: #b9d4e8;
+  font-size: 11px;
+}
+.learning-path {
+  margin-top: 28px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  flex-wrap: wrap;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: rgba(5, 22, 39, 0.6);
+}
+.learning-path span {
+  color: #55c4ff;
+  font-size: 11px;
+  margin-right: 10px;
+}
+.learning-path b {
+  font-size: 10px;
+  color: #a6c4dc;
+}
+.learning-path i {
+  color: #3ab6ff;
+}
+
+@keyframes skillLift {
+  0%,
+  100% {
+    margin-top: 0;
+  }
+  50% {
+    margin-top: -14px;
+  }
+}
+@keyframes corePulse {
+  0%,
+  100% {
+    box-shadow:
+      0 0 30px rgba(27, 165, 255, 0.2),
+      inset 0 0 24px rgba(55, 181, 255, 0.08);
+  }
+  50% {
+    box-shadow:
+      0 0 45px rgba(27, 165, 255, 0.34),
+      inset 0 0 28px rgba(55, 181, 255, 0.13);
+  }
+}
+@keyframes shine {
+  0%,
+  62% {
+    transform: translateX(-55%);
+  }
+  82%,
+  100% {
+    transform: translateX(55%);
+  }
+}
+
+@media (max-width: 1000px) {
+  .skills-stage {
+    height: 410px;
+  }
+  .floating-skill {
+    width: 148px;
+  }
+  .skill-card-3d {
+    width: 148px;
+  }
+  .skill-groups {
+    gap: 16px;
+  }
+}
+@media (max-width: 700px) {
+  .skills-stage {
+    height: 610px;
+    margin-top: 24px;
+    border-radius: 24px;
+  }
+  .stage-grid {
+    inset: 7% 10%;
+  }
+  .orbit-line-a {
+    width: 330px;
+    height: 470px;
+    transform: translate(-50%, -50%) rotateZ(0);
+  }
+  .orbit-line-b {
+    width: 250px;
+    height: 390px;
+  }
+  .stage-core {
+    width: 76px;
+    height: 76px;
+  }
+  .stage-core span {
+    font-size: 19px;
+  }
+  .floating-skill {
+    left: var(--m-left);
+    top: var(--m-top);
+    width: 145px;
+    height: 52px;
+  }
+  .skill-card-3d {
+    width: 145px;
+    height: 52px;
+    padding: 0 12px;
+  }
+  .skill-name {
+    font-size: 10px;
+  }
+  .skill-icon {
+    width: 27px;
+    height: 27px;
+  }
+  .skill-groups {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 380px) {
+  .skills-stage {
+    height: 650px;
+  }
+  .floating-skill {
+    width: 136px;
+  }
+  .skill-card-3d {
+    width: 136px;
+    padding: 0 10px;
+  }
+  .skill-name {
+    font-size: 9px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .floating-skill,
+  .stage-core,
+  .skill-shine {
+    animation: none;
+  }
+  .skill-card-3d {
+    transform: translateZ(var(--depth));
+  }
+}
+
+
+
+html[data-theme="light"] .stage-grid {
+  border-color: rgba(8, 125, 204, 0.10);
+  background: radial-gradient(
+    ellipse at center,
+    rgba(8, 125, 204, 0.08),
+    transparent 63%
+  );
+  box-shadow: 0 0 90px rgba(0, 145, 255, 0.06);
+}
+
+html[data-theme="light"] .stage-grid:before,
+html[data-theme="light"] .stage-grid:after {
+  border-color: rgba(8, 125, 204, 0.08);
+}
+
+html[data-theme="light"] .stage-glow {
+  background: radial-gradient(
+    circle,
+    rgba(40, 173, 255, 0.14) 0,
+    rgba(40, 173, 255, 0.05) 28%,
+    transparent 68%
+  );
+}
+
+html[data-theme="light"] .stage-core {
+  background: radial-gradient(
+    circle at 35% 30%,
+    rgba(48, 173, 255, 0.18),
+    rgba(235, 248, 255, 0.96) 68%
+  );
+  border-color: rgba(8, 125, 204, 0.30);
+  box-shadow:
+    0 0 30px rgba(27, 165, 255, 0.12),
+    inset 0 0 24px rgba(55, 181, 255, 0.06);
+}
+
+html[data-theme="light"] .stage-core span {
+  color: #102033;
+}
+
+html[data-theme="light"] .stage-core small {
+  color: #087dcc;
+}
+
+html[data-theme="light"] .orbit-line {
+  border-color: rgba(8, 125, 204, 0.12);
+}
+
+html[data-theme="light"] .skill-card-3d {
+  background: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.90),
+    rgba(238, 248, 255, 0.94)
+  );
+  border-color: rgba(8, 125, 204, 0.22);
+  box-shadow:
+    0 13px 28px rgba(30, 90, 140, 0.10),
+    0 0 22px rgba(19, 155, 255, 0.06),
+    inset 1px 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+html[data-theme="light"] .skill-card-3d:hover {
+  border-color: rgba(8, 125, 204, 0.48);
+  box-shadow:
+    0 18px 34px rgba(30, 90, 140, 0.14),
+    0 0 28px rgba(19, 165, 255, 0.12);
+}
+
+html[data-theme="light"] .skill-icon {
+  background: rgba(8, 125, 204, 0.07);
+  border-color: rgba(8, 125, 204, 0.16);
+  color: #087dcc;
+  box-shadow: 0 0 13px rgba(62, 190, 255, 0.08);
+}
+
+html[data-theme="light"] .skill-name {
+  color: #102033;
+}
+
+html[data-theme="light"] .skill-group {
+  background: rgba(255, 255, 255, 0.72);
+  border-color: rgba(30, 90, 140, 0.16);
+}
+
+html[data-theme="light"] .skill-group-title {
+  color: #304860;
+}
+
+html[data-theme="light"] .skill-group-title svg {
+  color: #087dcc;
+}
+
+html[data-theme="light"] .skill-chip {
+  background: rgba(8, 125, 204, 0.06);
+  border-color: rgba(8, 125, 204, 0.14);
+  color: #42647e;
+}
+
+html[data-theme="light"] .learning-path {
+  background: rgba(255, 255, 255, 0.72);
+  border-color: rgba(30, 90, 140, 0.16);
+}
+
+html[data-theme="light"] .learning-path span {
+  color: #087dcc;
+}
+
+html[data-theme="light"] .learning-path b {
+  color: #526b82;
+}
+
+html[data-theme="light"] .learning-path i {
+  color: #087dcc;
+}

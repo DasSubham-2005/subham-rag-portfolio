@@ -1,0 +1,328 @@
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  height: 72px;
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  padding: 0 5vw;
+  background: rgba(2, 8, 23, 0.82);
+  -webkit-backdrop-filter: blur(20px);
+backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--line);
+}
+.brand {
+  display: flex;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+  align-items: center;
+  gap: 10px;
+  color: var(--text);
+  font-weight: 800;
+  font-size: 17px;
+  white-space: nowrap;
+}
+.brand span {
+  color: var(--accent);
+  display: grid;
+}
+.brand svg {
+  width: 21px;
+}
+.desktop-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  flex: 1;
+}
+.desktop-nav a {
+  color: var(--muted);
+  font-size: 12px;
+  padding: 25px 10px;
+  position: relative;
+  transition:
+    color 0.2s,
+    text-shadow 0.2s;
+}
+.desktop-nav a:hover,
+.desktop-nav a.active {
+  color: #fff;
+}
+.desktop-nav a.active {
+  text-shadow: 0 0 16px rgba(69, 186, 255, 0.65);
+}
+.desktop-nav a.active:after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 15px;
+  right: 15px;
+  height: 2px;
+  background: var(--accent);
+  box-shadow:
+    0 0 14px var(--accent),
+    0 0 28px rgba(69, 186, 255, 0.45);
+}
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+.nav-actions a,
+.icon-btn {
+  color: var(--muted);
+  display: grid;
+  place-items: center;
+  border: 0;
+  background: transparent;
+}
+.nav-actions svg {
+  width: 17px;
+  height: 17px;
+}
+.icon-btn {
+  padding: 9px;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+}
+.admin-btn {
+  display: flex !important;
+  gap: 7px !important;
+  align-items: center;
+  border: 1px solid rgba(35, 169, 255, 0.55) !important;
+  border-radius: 999px;
+  padding: 9px 14px !important;
+  color: #67caff !important;
+}
+.mobile-menu-btn {
+  display: none;
+  border: 1px solid var(--line);
+  background: rgba(5, 22, 39, 0.7);
+  color: #79cfff;
+  border-radius: 10px;
+  padding: 8px;
+}
+.mobile-menu-btn svg {
+  width: 19px !important;
+  height: 19px !important;
+}
+.mobile-nav {
+  display: none;
+}
+
+@media (min-width: 601px) and (max-width: 1050px) {
+  .mobile-nav {
+    position: absolute;
+    display: flex;
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
+    top: 72px;
+    left: 0;
+    right: 0;
+    padding: 12px 24px 18px;
+    flex-direction: column;
+    gap: 4px;
+    background: rgba(2, 8, 23, 0.97);
+    -webkit-backdrop-filter: blur(22px);
+    backdrop-filter: blur(22px);
+    border-bottom: 1px solid var(--line);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35);
+    transform: translateY(-8px);
+    transition: 0.2s;
+  }
+
+  .menu-open .mobile-nav {
+    visibility: visible;
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+  }
+
+  .mobile-nav a {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 13px 16px;
+    border-radius: 10px;
+    color: #9bb7cf;
+    font-size: 14px;
+    transition: 0.2s;
+  }
+
+  .mobile-nav a.active {
+    background: rgba(35, 169, 255, 0.1);
+    color: #fff;
+    box-shadow:
+      inset 2px 0 0 var(--accent),
+      0 0 18px rgba(35, 169, 255, 0.06);
+  }
+
+  .mobile-nav a i {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: transparent;
+  }
+
+  .mobile-nav a.active i {
+    background: var(--accent);
+    box-shadow: 0 0 10px var(--accent);
+  }
+}
+
+@media (max-width: 1050px) {
+  .desktop-nav {
+    display: none;
+  }
+  .navbar {
+    justify-content: space-between;
+  }
+  .nav-actions {
+    margin-left: auto;
+  }
+  .mobile-menu-btn {
+    display: grid;
+    place-items: center;
+  }
+}
+@media (max-width: 600px) {
+  .navbar {
+    height: 64px;
+    padding: 0 16px;
+    gap: 10px;
+  }
+  .brand {
+    font-size: 15px;
+  }
+  .brand svg {
+    width: 19px;
+  }
+  .nav-actions {
+    gap: 6px;
+  }
+  .nav-actions > a {
+    display: none;
+  }
+  .admin-btn {
+    padding: 8px 10px !important;
+    font-size: 11px;
+  }
+  .admin-btn svg {
+    width: 15px !important;
+  }
+  .mobile-nav {
+    position: absolute;
+    display: flex;
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
+    top: 64px;
+    left: 0;
+    right: 0;
+    padding: 10px 14px 15px;
+    flex-direction: column;
+    gap: 3px;
+    background: rgba(2, 8, 23, 0.97);
+    -webkit-backdrop-filter: blur(22px);
+    backdrop-filter: blur(22px);
+    border-bottom: 1px solid var(--line);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35);
+    transform: translateY(-8px);
+    transition: 0.2s;
+  }
+  .menu-open .mobile-nav {
+    visibility: visible;
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+  }
+  .mobile-nav a {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 14px;
+    border-radius: 10px;
+    color: #9bb7cf;
+    font-size: 13px;
+    transition: 0.2s;
+  }
+  .mobile-nav a.active {
+    background: rgba(35, 169, 255, 0.1);
+    color: #fff;
+    box-shadow:
+      inset 2px 0 0 var(--accent),
+      0 0 18px rgba(35, 169, 255, 0.06);
+  }
+  .mobile-nav a i {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: transparent;
+  }
+  .mobile-nav a.active i {
+    background: var(--accent);
+    box-shadow: 0 0 10px var(--accent);
+  }
+}
+
+/* Light Theme Navbar */
+html[data-theme="light"] .navbar {
+  background: rgba(255, 255, 255, 0.82);
+}
+
+html[data-theme="light"] .desktop-nav a:hover,
+html[data-theme="light"] .desktop-nav a.active {
+  color: #102033;
+}
+
+html[data-theme="light"] .desktop-nav a.active {
+  text-shadow: 0 0 16px rgba(8, 125, 204, 0.35);
+}
+
+html[data-theme="light"] .mobile-menu-btn {
+  background: rgba(255, 255, 255, 0.75);
+  color: #087dcc;
+}
+
+html[data-theme="light"] .mobile-nav {
+  background: rgba(255, 255, 255, 0.97);
+}
+
+html[data-theme="light"] .mobile-nav a {
+  color: #5f7185;
+}
+
+html[data-theme="light"] .mobile-nav a.active {
+  color: #102033;
+  background: rgba(8, 125, 204, 0.08);
+}
+
+@media (max-width: 1050px) {
+  .nav-actions > a[aria-label="GitHub"],
+  .nav-actions > a[aria-label="LinkedIn"] {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+.brand-logo {
+  width: 34px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.brand-logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}

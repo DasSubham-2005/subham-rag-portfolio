@@ -1,0 +1,106 @@
+.edu-grid {
+  max-width: 950px;
+  margin: 50px auto;
+  display: grid;
+  gap: 16px;
+}
+.edu-card {
+  display: flex;
+  gap: 20px;
+  padding: 28px;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: linear-gradient(
+    145deg,
+    rgba(7, 27, 49, 0.8),
+    rgba(3, 11, 24, 0.9)
+  );
+}
+.edu-icon {
+  width: 52px;
+  height: 52px;
+  flex: 0 0 52px;
+  display: grid;
+  place-items: center;
+  border-radius: 15px;
+  background: rgba(25, 148, 240, 0.12);
+  color: #4dc2ff;
+}
+.edu-icon svg {
+  width: 24px;
+}
+.edu-card span {
+  font-size: 10px;
+  color: #5abfff;
+}
+.edu-card h3 {
+  margin: 7px 0 5px;
+}
+.edu-card b {
+  font-size: 12px;
+  color: #90b2cf;
+}
+.edu-card p {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+@media (max-width: 600px) {
+  .edu-grid {
+    margin: 30px auto;
+  }
+  .edu-card {
+    gap: 13px;
+    padding: 20px;
+  }
+  .edu-icon {
+    width: 43px;
+    height: 43px;
+    flex: 0 0 43px;
+  }
+  .edu-card h3 {
+    font-size: 15px;
+  }
+  .edu-card b {
+    font-size: 11px;
+  }
+  .edu-card p {
+    font-size: 11px;
+  }
+}
+
+/* =========================
+   LIGHT THEME — EDUCATION
+   ========================= */
+
+html[data-theme="light"] .edu-card {
+  background: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.92),
+    rgba(239, 248, 255, 0.96)
+  );
+  border-color: rgba(30, 90, 140, 0.16);
+  box-shadow: 0 10px 30px rgba(30, 90, 140, 0.05);
+}
+
+html[data-theme="light"] .edu-icon {
+  background: rgba(8, 125, 204, 0.08);
+  color: #087dcc;
+}
+
+html[data-theme="light"] .edu-card span {
+  color: #087dcc;
+}
+
+html[data-theme="light"] .edu-card h3 {
+  color: #102033;
+}
+
+html[data-theme="light"] .edu-card b {
+  color: #526b82;
+}
+
+html[data-theme="light"] .edu-card p {
+  color: #607b94;
+}
