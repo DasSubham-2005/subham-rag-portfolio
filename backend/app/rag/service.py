@@ -4,10 +4,29 @@ from chromadb.utils.embedding_functions import SentenceTransformerEmbeddingFunct
 from app.core.config import settings
 
 ROOT = Path(__file__).resolve().parents[2]
-client = chromadb.PersistentClient(path=str(ROOT / settings.chroma_dir))
-embedder = SentenceTransformerEmbeddingFunction(model_name="all-MiniLM-L6-v2")
-collection = client.get_or_create_collection(name="portfolio_knowledge", embedding_function=embedder)
+client = None
+embedder = None
+collection = None
 
+
+def get_collection():
+    global client, embedder, collection
+
+    if collection is None:
+        client = chromadb.PersistentClient(
+            path=str(ROOT / settings.chroma_dir)
+        )
+
+        embedder = SentenceTransformerEmbeddingFunction(
+            model_name="all-MiniLM-L6-v2"
+        )
+
+        collection = client.get_or_create_collection(
+            name="portfolio_knowledge",
+            embedding_function=embedder
+        )
+
+    return collection
 def chunk_text(text: str, size: int = 700, overlap: int = 100):
     words = text.split()
     chunks = []
@@ -18,6 +37,7 @@ def chunk_text(text: str, size: int = 700, overlap: int = 100):
     return [c for c in chunks if c.strip()]
 
 def index_documents(documents: list[dict]):
+    collection = get_collection()
     ids, texts, metas = [], [], []
     for doc in documents:
         for i, chunk in enumerate(chunk_text(doc["text"])):
@@ -27,6 +47,7 @@ def index_documents(documents: list[dict]):
     return len(ids)
 
 def retrieve(query: str, k: int = 5):
+    collection = get_collection()
     query_lower = query.lower()
 
     source_hint = None
