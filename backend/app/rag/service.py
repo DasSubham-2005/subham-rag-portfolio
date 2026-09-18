@@ -10,25 +10,33 @@ client = None
 embedder = None
 collection = None
 
-
 def get_collection():
     global client, embedder, collection
 
     if collection is None:
+        print("RAG: starting Chroma initialization", flush=True)
+
         client = chromadb.PersistentClient(
             path=str(ROOT / settings.chroma_dir)
         )
 
+        print("RAG: Chroma client ready", flush=True)
+
         embedder = SentenceTransformerEmbeddingFunction(
             model_name="all-MiniLM-L6-v2"
         )
+
+        print("RAG: embedding model ready", flush=True)
 
         collection = client.get_or_create_collection(
             name="portfolio_knowledge",
             embedding_function=embedder
         )
 
+        print("RAG: collection ready", flush=True)
+
     return collection
+
 def chunk_text(text: str, size: int = 700, overlap: int = 100):
     words = text.split()
     chunks = []
