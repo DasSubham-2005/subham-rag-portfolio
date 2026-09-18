@@ -23,7 +23,8 @@ def get_collection():
         print("RAG: Chroma client ready", flush=True)
 
         embedder = SentenceTransformerEmbeddingFunction(
-            model_name="all-MiniLM-L6-v2"
+            model_name="all-MiniLM-L6-v2",
+            device="cpu"
         )
 
         print("RAG: embedding model ready", flush=True)
