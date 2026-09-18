@@ -3,7 +3,7 @@ import os
 import threading
 
 # ============================================================
-# Low-memory / Render optimizations
+# Environment / low-memory settings
 # ============================================================
 
 os.environ["ANONYMIZED_TELEMETRY"] = "False"
@@ -13,22 +13,19 @@ os.environ["MKL_NUM_THREADS"] = "1"
 os.environ["OPENBLAS_NUM_THREADS"] = "1"
 os.environ["NUMEXPR_NUM_THREADS"] = "1"
 
-import torch
-
-torch.set_num_threads(1)
-torch.set_num_interop_threads(1)
-
-import chromadb
-from sentence_transformers import SentenceTransformer
-
 from app.core.config import settings
 
 
 # ============================================================
-# Globals
+# Paths
 # ============================================================
 
 ROOT = Path(__file__).resolve().parents[2]
+
+
+# ============================================================
+# Lazy-loaded RAG resources
+# ============================================================
 
 client = None
 model = None
@@ -38,10 +35,17 @@ _init_lock = threading.Lock()
 
 
 # ============================================================
-# Initialize Chroma + all-MiniLM-L6-v2
+# RAG initialization
 # ============================================================
 
 def get_collection():
+    """
+    Lazily initialize ChromaDB and all-MiniLM-L6-v2.
+
+    Heavy libraries are imported only when the first RAG
+    request actually needs them.
+    """
+
     global client, model, collection
 
     if collection is not None:
@@ -54,13 +58,29 @@ def get_collection():
 
         print("RAG: starting Chroma initialization", flush=True)
 
+        # Heavy imports happen only when RAG is requested
+        import torch
+        import chromadb
+        from sentence_transformers import SentenceTransformer
+
+        # Keep PyTorch CPU usage lightweight
+        torch.set_num_threads(1)
+        torch.set_num_interop_threads(1)
+
+        # ----------------------------------------------------
+        # Chroma
+        # ----------------------------------------------------
+
         client = chromadb.PersistentClient(
             path=str(ROOT / settings.chroma_dir)
         )
 
         print("RAG: Chroma client ready", flush=True)
 
-        # Direct SentenceTransformer loading
+        # ----------------------------------------------------
+        # all-MiniLM-L6-v2
+        # ----------------------------------------------------
+
         model = SentenceTransformer(
             "all-MiniLM-L6-v2",
             device="cpu",
@@ -69,6 +89,13 @@ def get_collection():
         model.eval()
 
         print("RAG: embedding model ready", flush=True)
+
+        # ----------------------------------------------------
+        # Chroma collection
+        #
+        # Embeddings are generated manually so Chroma does not
+        # create another embedding model internally.
+        # ----------------------------------------------------
 
         collection = client.get_or_create_collection(
             name="portfolio_knowledge"
@@ -80,13 +107,20 @@ def get_collection():
 
 
 # ============================================================
-# Generate embeddings
+# Embedding generation
 # ============================================================
 
 def embed_texts(texts: list[str]):
+    """
+    Generate semantic embeddings using all-MiniLM-L6-v2.
+    """
+
     get_collection()
 
+    import torch
+
     with torch.inference_mode():
+
         embeddings = model.encode(
             texts,
             batch_size=1,
@@ -99,7 +133,7 @@ def embed_texts(texts: list[str]):
 
 
 # ============================================================
-# Chunk text
+# Text chunking
 # ============================================================
 
 def chunk_text(
@@ -107,9 +141,14 @@ def chunk_text(
     size: int = 700,
     overlap: int = 100,
 ):
+    """
+    Split portfolio text into overlapping word chunks.
+    """
+
     words = text.split()
 
     chunks = []
+
     start = 0
 
     step = max(1, size - overlap)
@@ -133,27 +172,34 @@ def chunk_text(
 # ============================================================
 
 def index_documents(documents: list[dict]):
+    """
+    Convert documents into chunks, generate embeddings,
+    and store them in ChromaDB.
+    """
+
     collection = get_collection()
 
     ids = []
     texts = []
-    metas = []
+    metadatas = []
 
-    for doc in documents:
+    for document in documents:
 
-        chunks = chunk_text(doc["text"])
+        chunks = chunk_text(
+            document["text"]
+        )
 
-        for i, chunk in enumerate(chunks):
+        for index, chunk in enumerate(chunks):
 
             ids.append(
-                f"{doc['id']}-{i}"
+                f"{document['id']}-{index}"
             )
 
             texts.append(chunk)
 
-            metas.append(
+            metadatas.append(
                 {
-                    "source": doc["source"]
+                    "source": document["source"]
                 }
             )
 
@@ -166,27 +212,35 @@ def index_documents(documents: list[dict]):
         ids=ids,
         documents=texts,
         embeddings=embeddings,
-        metadatas=metas,
+        metadatas=metadatas,
     )
 
     return len(ids)
 
 
 # ============================================================
-# Retrieve relevant knowledge
+# Retrieve portfolio knowledge
 # ============================================================
 
 def retrieve(
     query: str,
     k: int = 5,
 ):
+    """
+    Retrieve the most relevant portfolio knowledge
+    using semantic embeddings.
+    """
+
     collection = get_collection()
 
     query_lower = query.lower()
 
     source_hint = None
 
+    # --------------------------------------------------------
     # Experience
+    # --------------------------------------------------------
+
     if any(
         word in query_lower
         for word in [
@@ -201,7 +255,10 @@ def retrieve(
     ):
         source_hint = "experience"
 
+    # --------------------------------------------------------
     # Education
+    # --------------------------------------------------------
+
     elif any(
         word in query_lower
         for word in [
@@ -216,7 +273,10 @@ def retrieve(
     ):
         source_hint = "education"
 
+    # --------------------------------------------------------
     # Skills
+    # --------------------------------------------------------
+
     elif any(
         word in query_lower
         for word in [
@@ -229,7 +289,10 @@ def retrieve(
     ):
         source_hint = "skills"
 
+    # --------------------------------------------------------
     # Projects
+    # --------------------------------------------------------
+
     elif any(
         word in query_lower
         for word in [
@@ -241,7 +304,10 @@ def retrieve(
     ):
         source_hint = "projects"
 
+    # --------------------------------------------------------
     # Certificates
+    # --------------------------------------------------------
+
     elif any(
         word in query_lower
         for word in [
@@ -253,7 +319,7 @@ def retrieve(
         source_hint = "certificates"
 
     # ========================================================
-    # Projects
+    # Project retrieval
     # ========================================================
 
     if source_hint == "projects":
@@ -265,31 +331,33 @@ def retrieve(
             ]
         )
 
-        project_docs = []
+        project_documents = []
 
-        for doc, meta in zip(
+        for document, metadata in zip(
             all_data.get("documents", []),
             all_data.get("metadatas", []),
         ):
 
-            source = (meta or {}).get(
+            source = (
+                metadata or {}
+            ).get(
                 "source",
                 "",
             )
 
             if source.startswith("project:"):
 
-                project_docs.append(
+                project_documents.append(
                     {
-                        "text": doc,
+                        "text": document,
                         "source": source,
                     }
                 )
 
-        return project_docs[:k]
+        return project_documents[:k]
 
     # ========================================================
-    # Skills
+    # Skills retrieval
     # ========================================================
 
     if source_hint == "skills":
@@ -301,60 +369,74 @@ def retrieve(
             ]
         )
 
-        skill_docs = []
+        skill_documents = []
 
-        for doc, meta in zip(
+        for document, metadata in zip(
             all_data.get("documents", []),
             all_data.get("metadatas", []),
         ):
 
-            source = (meta or {}).get(
+            source = (
+                metadata or {}
+            ).get(
                 "source",
                 "",
             )
 
             if source == "skills":
 
-                skill_docs.append(
+                skill_documents.append(
                     {
-                        "text": doc,
+                        "text": document,
                         "source": source,
                     }
                 )
 
-        return skill_docs
+        return skill_documents
 
     # ========================================================
-    # Semantic retrieval
+    # Semantic query
     # ========================================================
 
     query_embedding = embed_texts(
         [query]
     )[0]
 
+    # --------------------------------------------------------
+    # Filtered semantic retrieval
+    # --------------------------------------------------------
+
     if source_hint:
 
         result = collection.query(
-            query_embeddings=[query_embedding],
+            query_embeddings=[
+                query_embedding
+            ],
             n_results=k,
             where={
                 "source": source_hint
             },
         )
 
+    # --------------------------------------------------------
+    # General semantic retrieval
+    # --------------------------------------------------------
+
     else:
 
         result = collection.query(
-            query_embeddings=[query_embedding],
+            query_embeddings=[
+                query_embedding
+            ],
             n_results=k,
         )
 
-    docs = result.get(
+    documents = result.get(
         "documents",
         [[]],
     )[0]
 
-    metas = result.get(
+    metadatas = result.get(
         "metadatas",
         [[]],
     )[0]
@@ -370,7 +452,7 @@ def retrieve(
             ),
         }
         for document, metadata in zip(
-            docs,
-            metas,
+            documents,
+            metadatas,
         )
     ]
