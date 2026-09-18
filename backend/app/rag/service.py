@@ -1,6 +1,11 @@
 from pathlib import Path
 import os
 os.environ["ANONYMIZED_TELEMETRY"] = "False"
+import os
+
+os.environ["TOKENIZERS_PARALLELISM"] = "false"
+os.environ["OMP_NUM_THREADS"] = "1"
+os.environ["MKL_NUM_THREADS"] = "1"
 import chromadb
 from chromadb.utils.embedding_functions import SentenceTransformerEmbeddingFunction
 from app.core.config import settings
