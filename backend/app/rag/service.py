@@ -1,77 +1,58 @@
-# 
-
 from pathlib import Path
 import os
 import threading
 
 # ============================================================
-# Render / low-memory optimizations
+# Low-memory / Render optimizations
 # ============================================================
 
 os.environ["ANONYMIZED_TELEMETRY"] = "False"
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
-
-# Limit native CPU thread usage
 os.environ["OMP_NUM_THREADS"] = "1"
 os.environ["MKL_NUM_THREADS"] = "1"
 os.environ["OPENBLAS_NUM_THREADS"] = "1"
-os.environ["VECLIB_MAXIMUM_THREADS"] = "1"
 os.environ["NUMEXPR_NUM_THREADS"] = "1"
 
 import torch
 
-# Keep PyTorch from creating many CPU threads
 torch.set_num_threads(1)
 torch.set_num_interop_threads(1)
 
 import chromadb
-from chromadb.utils.embedding_functions import (
-    SentenceTransformerEmbeddingFunction,
-)
+from sentence_transformers import SentenceTransformer
 
 from app.core.config import settings
 
 
 # ============================================================
-# Paths
+# Globals
 # ============================================================
 
 ROOT = Path(__file__).resolve().parents[2]
 
-
-# ============================================================
-# Lazy-loaded RAG resources
-# ============================================================
-
 client = None
-embedder = None
+model = None
 collection = None
 
-# Prevent two requests from loading the embedding model twice
 _init_lock = threading.Lock()
 
 
 # ============================================================
-# Chroma + embedding model
+# Initialize Chroma + all-MiniLM-L6-v2
 # ============================================================
 
 def get_collection():
-    global client, embedder, collection
+    global client, model, collection
 
     if collection is not None:
         return collection
 
     with _init_lock:
 
-        # Another request may have initialized it
         if collection is not None:
             return collection
 
         print("RAG: starting Chroma initialization", flush=True)
-
-        # ----------------------------------------------------
-        # Chroma client
-        # ----------------------------------------------------
 
         client = chromadb.PersistentClient(
             path=str(ROOT / settings.chroma_dir)
@@ -79,28 +60,18 @@ def get_collection():
 
         print("RAG: Chroma client ready", flush=True)
 
-        # ----------------------------------------------------
-        # all-MiniLM-L6-v2
-        #
-        # Keep the required embedding model.
-        # CPU-only + single-threaded for Render memory/CPU.
-        # ----------------------------------------------------
-
-        embedder = SentenceTransformerEmbeddingFunction(
-            model_name="all-MiniLM-L6-v2",
+        # Direct SentenceTransformer loading
+        model = SentenceTransformer(
+            "all-MiniLM-L6-v2",
             device="cpu",
-            normalize_embeddings=True,
         )
+
+        model.eval()
 
         print("RAG: embedding model ready", flush=True)
 
-        # ----------------------------------------------------
-        # Chroma collection
-        # ----------------------------------------------------
-
         collection = client.get_or_create_collection(
-            name="portfolio_knowledge",
-            embedding_function=embedder,
+            name="portfolio_knowledge"
         )
 
         print("RAG: collection ready", flush=True)
@@ -109,7 +80,26 @@ def get_collection():
 
 
 # ============================================================
-# Text chunking
+# Generate embeddings
+# ============================================================
+
+def embed_texts(texts: list[str]):
+    get_collection()
+
+    with torch.inference_mode():
+        embeddings = model.encode(
+            texts,
+            batch_size=1,
+            show_progress_bar=False,
+            normalize_embeddings=True,
+            convert_to_numpy=True,
+        )
+
+    return embeddings.tolist()
+
+
+# ============================================================
+# Chunk text
 # ============================================================
 
 def chunk_text(
@@ -125,7 +115,10 @@ def chunk_text(
     step = max(1, size - overlap)
 
     while start < len(words):
-        chunk = " ".join(words[start:start + size])
+
+        chunk = " ".join(
+            words[start:start + size]
+        )
 
         if chunk.strip():
             chunks.append(chunk)
@@ -164,19 +157,23 @@ def index_documents(documents: list[dict]):
                 }
             )
 
-    if ids:
+    if not texts:
+        return 0
 
-        collection.upsert(
-            ids=ids,
-            documents=texts,
-            metadatas=metas,
-        )
+    embeddings = embed_texts(texts)
+
+    collection.upsert(
+        ids=ids,
+        documents=texts,
+        embeddings=embeddings,
+        metadatas=metas,
+    )
 
     return len(ids)
 
 
 # ============================================================
-# Retrieve relevant portfolio knowledge
+# Retrieve relevant knowledge
 # ============================================================
 
 def retrieve(
@@ -189,10 +186,7 @@ def retrieve(
 
     source_hint = None
 
-    # --------------------------------------------------------
     # Experience
-    # --------------------------------------------------------
-
     if any(
         word in query_lower
         for word in [
@@ -207,10 +201,7 @@ def retrieve(
     ):
         source_hint = "experience"
 
-    # --------------------------------------------------------
     # Education
-    # --------------------------------------------------------
-
     elif any(
         word in query_lower
         for word in [
@@ -225,10 +216,7 @@ def retrieve(
     ):
         source_hint = "education"
 
-    # --------------------------------------------------------
     # Skills
-    # --------------------------------------------------------
-
     elif any(
         word in query_lower
         for word in [
@@ -241,10 +229,7 @@ def retrieve(
     ):
         source_hint = "skills"
 
-    # --------------------------------------------------------
     # Projects
-    # --------------------------------------------------------
-
     elif any(
         word in query_lower
         for word in [
@@ -256,10 +241,7 @@ def retrieve(
     ):
         source_hint = "projects"
 
-    # --------------------------------------------------------
     # Certificates
-    # --------------------------------------------------------
-
     elif any(
         word in query_lower
         for word in [
@@ -271,7 +253,7 @@ def retrieve(
         source_hint = "certificates"
 
     # ========================================================
-    # Project-specific retrieval
+    # Projects
     # ========================================================
 
     if source_hint == "projects":
@@ -307,7 +289,7 @@ def retrieve(
         return project_docs[:k]
 
     # ========================================================
-    # Skills-specific retrieval
+    # Skills
     # ========================================================
 
     if source_hint == "skills":
@@ -343,13 +325,17 @@ def retrieve(
         return skill_docs
 
     # ========================================================
-    # Source-filtered semantic retrieval
+    # Semantic retrieval
     # ========================================================
+
+    query_embedding = embed_texts(
+        [query]
+    )[0]
 
     if source_hint:
 
         result = collection.query(
-            query_texts=[query],
+            query_embeddings=[query_embedding],
             n_results=k,
             where={
                 "source": source_hint
@@ -359,7 +345,7 @@ def retrieve(
     else:
 
         result = collection.query(
-            query_texts=[query],
+            query_embeddings=[query_embedding],
             n_results=k,
         )
 
