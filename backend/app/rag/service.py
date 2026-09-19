@@ -16,13 +16,17 @@ ROOT = Path(__file__).resolve().parents[2]
 
 client = None
 model = None
+tokenizer = None
 collection = None
 
 _init_lock = threading.Lock()
 
 
+MODEL_NAME = "sentence-transformers/all-MiniLM-L6-v2"
+
+
 def get_collection():
-    global client, model, collection
+    global client, model, tokenizer, collection
 
     if collection is not None:
         return collection
@@ -55,13 +59,13 @@ def get_collection():
         print("RAG: chromadb imported", flush=True)
 
         # --------------------------------
-        # STEP 3: Import SentenceTransformer
+        # STEP 3: Import Transformers
         # --------------------------------
-        print("RAG: importing sentence_transformers", flush=True)
+        print("RAG: importing transformers", flush=True)
 
-        from sentence_transformers import SentenceTransformer
+        from transformers import AutoTokenizer, AutoModel
 
-        print("RAG: sentence_transformers imported", flush=True)
+        print("RAG: transformers imported", flush=True)
 
         # --------------------------------
         # STEP 4: Create Chroma client
@@ -75,21 +79,32 @@ def get_collection():
         print("RAG: Chroma client ready", flush=True)
 
         # --------------------------------
-        # STEP 5: Load embedding model
+        # STEP 5: Load MiniLM tokenizer
+        # --------------------------------
+        print("RAG: loading MiniLM tokenizer", flush=True)
+
+        tokenizer = AutoTokenizer.from_pretrained(
+            MODEL_NAME
+        )
+
+        print("RAG: tokenizer ready", flush=True)
+
+        # --------------------------------
+        # STEP 6: Load MiniLM model
         # --------------------------------
         print("RAG: loading all-MiniLM-L6-v2", flush=True)
 
-        model = SentenceTransformer(
-            "all-MiniLM-L6-v2",
-            device="cpu",
+        model = AutoModel.from_pretrained(
+            MODEL_NAME
         )
 
+        model.to("cpu")
         model.eval()
 
         print("RAG: embedding model ready", flush=True)
 
         # --------------------------------
-        # STEP 6: Create collection
+        # STEP 7: Create Chroma collection
         # --------------------------------
         print("RAG: creating collection", flush=True)
 
@@ -106,17 +121,41 @@ def embed_texts(texts: list[str]):
     get_collection()
 
     import torch
+    import torch.nn.functional as F
+
+    encoded = tokenizer(
+        texts,
+        padding=True,
+        truncation=True,
+        max_length=256,
+        return_tensors="pt",
+    )
 
     with torch.inference_mode():
-        embeddings = model.encode(
-            texts,
-            batch_size=1,
-            show_progress_bar=False,
-            normalize_embeddings=True,
-            convert_to_numpy=True,
+        output = model(**encoded)
+
+        token_embeddings = output.last_hidden_state
+        attention_mask = encoded["attention_mask"]
+
+        mask = attention_mask.unsqueeze(-1).expand(
+            token_embeddings.size()
+        ).float()
+
+        masked_embeddings = token_embeddings * mask
+
+        summed = masked_embeddings.sum(dim=1)
+
+        counts = mask.sum(dim=1).clamp(min=1e-9)
+
+        embeddings = summed / counts
+
+        embeddings = F.normalize(
+            embeddings,
+            p=2,
+            dim=1,
         )
 
-    return embeddings.tolist()
+    return embeddings.cpu().numpy().tolist()
 
 
 def chunk_text(
@@ -131,7 +170,9 @@ def chunk_text(
     step = max(1, size - overlap)
 
     while start < len(words):
-        chunk = " ".join(words[start:start + size])
+        chunk = " ".join(
+            words[start:start + size]
+        )
 
         if chunk.strip():
             chunks.append(chunk)
@@ -149,11 +190,17 @@ def index_documents(documents: list[dict]):
     metadatas = []
 
     for document in documents:
-        chunks = chunk_text(document["text"])
+        chunks = chunk_text(
+            document["text"]
+        )
 
         for index, chunk in enumerate(chunks):
-            ids.append(f"{document['id']}-{index}")
+            ids.append(
+                f"{document['id']}-{index}"
+            )
+
             texts.append(chunk)
+
             metadatas.append({
                 "source": document["source"]
             })
@@ -173,7 +220,10 @@ def index_documents(documents: list[dict]):
     return len(ids)
 
 
-def retrieve(query: str, k: int = 5):
+def retrieve(
+    query: str,
+    k: int = 5,
+):
     collection = get_collection()
 
     query_lower = query.lower()
@@ -248,7 +298,9 @@ def retrieve(query: str, k: int = 5):
             all_data.get("documents", []),
             all_data.get("metadatas", []),
         ):
-            source = (metadata or {}).get(
+            source = (
+                metadata or {}
+            ).get(
                 "source",
                 "",
             )
@@ -280,7 +332,9 @@ def retrieve(query: str, k: int = 5):
             all_data.get("documents", []),
             all_data.get("metadatas", []),
         ):
-            source = (metadata or {}).get(
+            source = (
+                metadata or {}
+            ).get(
                 "source",
                 "",
             )
@@ -297,12 +351,16 @@ def retrieve(query: str, k: int = 5):
     # Semantic RAG retrieval
     # --------------------------------
 
-    query_embedding = embed_texts([query])[0]
+    query_embedding = embed_texts(
+        [query]
+    )[0]
 
     if source_hint:
 
         result = collection.query(
-            query_embeddings=[query_embedding],
+            query_embeddings=[
+                query_embedding
+            ],
             n_results=k,
             where={
                 "source": source_hint
@@ -312,7 +370,9 @@ def retrieve(query: str, k: int = 5):
     else:
 
         result = collection.query(
-            query_embeddings=[query_embedding],
+            query_embeddings=[
+                query_embedding
+            ],
             n_results=k,
         )
 
