@@ -69,7 +69,7 @@ function Login({ onLogin }) {
   const submit = async (e) => {
     e.preventDefault();
     try {
-      const r = await api("/api/auth/login", {
+      const r = await api("/api/admin/login", {
         method: "POST",
         body: { username: u, password: p },
       });
