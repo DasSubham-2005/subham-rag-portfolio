@@ -27,7 +27,7 @@ def get_collection():
         if collection is not None:
             return collection
 
-        print("RAG: starting Chroma initialization", flush=True)
+        print(f"RAG: loading FastEmbed {MODEL_NAME}", flush=True)
 
         import chromadb
         from fastembed import TextEmbedding
