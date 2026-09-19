@@ -2,10 +2,7 @@ from pathlib import Path
 import os
 import threading
 
-# ============================================================
-# Environment / low-memory settings
-# ============================================================
-
+# Keep runtime lightweight
 os.environ["ANONYMIZED_TELEMETRY"] = "False"
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 os.environ["OMP_NUM_THREADS"] = "1"
@@ -15,17 +12,7 @@ os.environ["NUMEXPR_NUM_THREADS"] = "1"
 
 from app.core.config import settings
 
-
-# ============================================================
-# Paths
-# ============================================================
-
 ROOT = Path(__file__).resolve().parents[2]
-
-
-# ============================================================
-# Lazy-loaded RAG resources
-# ============================================================
 
 client = None
 model = None
@@ -34,42 +21,52 @@ collection = None
 _init_lock = threading.Lock()
 
 
-# ============================================================
-# RAG initialization
-# ============================================================
-
 def get_collection():
-    """
-    Lazily initialize ChromaDB and all-MiniLM-L6-v2.
-
-    Heavy libraries are imported only when the first RAG
-    request actually needs them.
-    """
-
     global client, model, collection
 
     if collection is not None:
         return collection
 
     with _init_lock:
-
         if collection is not None:
             return collection
 
         print("RAG: starting Chroma initialization", flush=True)
 
-        # Heavy imports happen only when RAG is requested
-        import torch
-        import chromadb
-        from sentence_transformers import SentenceTransformer
+        # --------------------------------
+        # STEP 1: Import torch
+        # --------------------------------
+        print("RAG: importing torch", flush=True)
 
-        # Keep PyTorch CPU usage lightweight
+        import torch
+
+        print("RAG: torch imported", flush=True)
+
         torch.set_num_threads(1)
         torch.set_num_interop_threads(1)
 
-        # ----------------------------------------------------
-        # Chroma
-        # ----------------------------------------------------
+        # --------------------------------
+        # STEP 2: Import ChromaDB
+        # --------------------------------
+        print("RAG: importing chromadb", flush=True)
+
+        import chromadb
+
+        print("RAG: chromadb imported", flush=True)
+
+        # --------------------------------
+        # STEP 3: Import SentenceTransformer
+        # --------------------------------
+        print("RAG: importing sentence_transformers", flush=True)
+
+        from sentence_transformers import SentenceTransformer
+
+        print("RAG: sentence_transformers imported", flush=True)
+
+        # --------------------------------
+        # STEP 4: Create Chroma client
+        # --------------------------------
+        print("RAG: creating Chroma client", flush=True)
 
         client = chromadb.PersistentClient(
             path=str(ROOT / settings.chroma_dir)
@@ -77,9 +74,10 @@ def get_collection():
 
         print("RAG: Chroma client ready", flush=True)
 
-        # ----------------------------------------------------
-        # all-MiniLM-L6-v2
-        # ----------------------------------------------------
+        # --------------------------------
+        # STEP 5: Load embedding model
+        # --------------------------------
+        print("RAG: loading all-MiniLM-L6-v2", flush=True)
 
         model = SentenceTransformer(
             "all-MiniLM-L6-v2",
@@ -90,12 +88,10 @@ def get_collection():
 
         print("RAG: embedding model ready", flush=True)
 
-        # ----------------------------------------------------
-        # Chroma collection
-        #
-        # Embeddings are generated manually so Chroma does not
-        # create another embedding model internally.
-        # ----------------------------------------------------
+        # --------------------------------
+        # STEP 6: Create collection
+        # --------------------------------
+        print("RAG: creating collection", flush=True)
 
         collection = client.get_or_create_collection(
             name="portfolio_knowledge"
@@ -106,21 +102,12 @@ def get_collection():
     return collection
 
 
-# ============================================================
-# Embedding generation
-# ============================================================
-
 def embed_texts(texts: list[str]):
-    """
-    Generate semantic embeddings using all-MiniLM-L6-v2.
-    """
-
     get_collection()
 
     import torch
 
     with torch.inference_mode():
-
         embeddings = model.encode(
             texts,
             batch_size=1,
@@ -132,32 +119,19 @@ def embed_texts(texts: list[str]):
     return embeddings.tolist()
 
 
-# ============================================================
-# Text chunking
-# ============================================================
-
 def chunk_text(
     text: str,
     size: int = 700,
     overlap: int = 100,
 ):
-    """
-    Split portfolio text into overlapping word chunks.
-    """
-
     words = text.split()
-
     chunks = []
 
     start = 0
-
     step = max(1, size - overlap)
 
     while start < len(words):
-
-        chunk = " ".join(
-            words[start:start + size]
-        )
+        chunk = " ".join(words[start:start + size])
 
         if chunk.strip():
             chunks.append(chunk)
@@ -167,16 +141,7 @@ def chunk_text(
     return chunks
 
 
-# ============================================================
-# Index documents
-# ============================================================
-
 def index_documents(documents: list[dict]):
-    """
-    Convert documents into chunks, generate embeddings,
-    and store them in ChromaDB.
-    """
-
     collection = get_collection()
 
     ids = []
@@ -184,24 +149,14 @@ def index_documents(documents: list[dict]):
     metadatas = []
 
     for document in documents:
-
-        chunks = chunk_text(
-            document["text"]
-        )
+        chunks = chunk_text(document["text"])
 
         for index, chunk in enumerate(chunks):
-
-            ids.append(
-                f"{document['id']}-{index}"
-            )
-
+            ids.append(f"{document['id']}-{index}")
             texts.append(chunk)
-
-            metadatas.append(
-                {
-                    "source": document["source"]
-                }
-            )
+            metadatas.append({
+                "source": document["source"]
+            })
 
     if not texts:
         return 0
@@ -218,109 +173,65 @@ def index_documents(documents: list[dict]):
     return len(ids)
 
 
-# ============================================================
-# Retrieve portfolio knowledge
-# ============================================================
-
-def retrieve(
-    query: str,
-    k: int = 5,
-):
-    """
-    Retrieve the most relevant portfolio knowledge
-    using semantic embeddings.
-    """
-
+def retrieve(query: str, k: int = 5):
     collection = get_collection()
 
     query_lower = query.lower()
-
     source_hint = None
 
-    # --------------------------------------------------------
-    # Experience
-    # --------------------------------------------------------
+    # --------------------------------
+    # Detect portfolio category
+    # --------------------------------
 
-    if any(
-        word in query_lower
-        for word in [
-            "experience",
-            "work experience",
-            "internship",
-            "job",
-            "role",
-            "worked",
-            "career",
-        ]
-    ):
+    if any(word in query_lower for word in [
+        "experience",
+        "work experience",
+        "internship",
+        "job",
+        "role",
+        "worked",
+        "career",
+    ]):
         source_hint = "experience"
 
-    # --------------------------------------------------------
-    # Education
-    # --------------------------------------------------------
-
-    elif any(
-        word in query_lower
-        for word in [
-            "education",
-            "degree",
-            "college",
-            "university",
-            "school",
-            "study",
-            "studied",
-        ]
-    ):
+    elif any(word in query_lower for word in [
+        "education",
+        "degree",
+        "college",
+        "university",
+        "school",
+        "study",
+        "studied",
+    ]):
         source_hint = "education"
 
-    # --------------------------------------------------------
-    # Skills
-    # --------------------------------------------------------
-
-    elif any(
-        word in query_lower
-        for word in [
-            "skill",
-            "skills",
-            "technology",
-            "technologies",
-            "programming",
-        ]
-    ):
+    elif any(word in query_lower for word in [
+        "skill",
+        "skills",
+        "technology",
+        "technologies",
+        "programming",
+    ]):
         source_hint = "skills"
 
-    # --------------------------------------------------------
-    # Projects
-    # --------------------------------------------------------
-
-    elif any(
-        word in query_lower
-        for word in [
-            "project",
-            "projects",
-            "built",
-            "developed",
-        ]
-    ):
+    elif any(word in query_lower for word in [
+        "project",
+        "projects",
+        "built",
+        "developed",
+    ]):
         source_hint = "projects"
 
-    # --------------------------------------------------------
-    # Certificates
-    # --------------------------------------------------------
-
-    elif any(
-        word in query_lower
-        for word in [
-            "certificate",
-            "certification",
-            "certifications",
-        ]
-    ):
+    elif any(word in query_lower for word in [
+        "certificate",
+        "certification",
+        "certifications",
+    ]):
         source_hint = "certificates"
 
-    # ========================================================
-    # Project retrieval
-    # ========================================================
+    # --------------------------------
+    # Projects
+    # --------------------------------
 
     if source_hint == "projects":
 
@@ -337,28 +248,22 @@ def retrieve(
             all_data.get("documents", []),
             all_data.get("metadatas", []),
         ):
-
-            source = (
-                metadata or {}
-            ).get(
+            source = (metadata or {}).get(
                 "source",
                 "",
             )
 
             if source.startswith("project:"):
-
-                project_documents.append(
-                    {
-                        "text": document,
-                        "source": source,
-                    }
-                )
+                project_documents.append({
+                    "text": document,
+                    "source": source,
+                })
 
         return project_documents[:k]
 
-    # ========================================================
-    # Skills retrieval
-    # ========================================================
+    # --------------------------------
+    # Skills
+    # --------------------------------
 
     if source_hint == "skills":
 
@@ -375,59 +280,39 @@ def retrieve(
             all_data.get("documents", []),
             all_data.get("metadatas", []),
         ):
-
-            source = (
-                metadata or {}
-            ).get(
+            source = (metadata or {}).get(
                 "source",
                 "",
             )
 
             if source == "skills":
-
-                skill_documents.append(
-                    {
-                        "text": document,
-                        "source": source,
-                    }
-                )
+                skill_documents.append({
+                    "text": document,
+                    "source": source,
+                })
 
         return skill_documents
 
-    # ========================================================
-    # Semantic query
-    # ========================================================
+    # --------------------------------
+    # Semantic RAG retrieval
+    # --------------------------------
 
-    query_embedding = embed_texts(
-        [query]
-    )[0]
-
-    # --------------------------------------------------------
-    # Filtered semantic retrieval
-    # --------------------------------------------------------
+    query_embedding = embed_texts([query])[0]
 
     if source_hint:
 
         result = collection.query(
-            query_embeddings=[
-                query_embedding
-            ],
+            query_embeddings=[query_embedding],
             n_results=k,
             where={
                 "source": source_hint
             },
         )
 
-    # --------------------------------------------------------
-    # General semantic retrieval
-    # --------------------------------------------------------
-
     else:
 
         result = collection.query(
-            query_embeddings=[
-                query_embedding
-            ],
+            query_embeddings=[query_embedding],
             n_results=k,
         )
 
