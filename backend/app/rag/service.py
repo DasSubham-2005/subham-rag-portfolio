@@ -3,6 +3,9 @@ import os
 import threading
 
 os.environ["ANONYMIZED_TELEMETRY"] = "False"
+os.environ["TOKENIZERS_PARALLELISM"] = "false"
+os.environ["OMP_NUM_THREADS"] = "1"
+os.environ["ORT_NUM_THREADS"] = "1"
 
 from app.core.config import settings
 
@@ -27,12 +30,10 @@ def get_collection():
         if collection is not None:
             return collection
 
-        print(f"RAG: loading FastEmbed {MODEL_NAME}", flush=True)
+        print("RAG: starting Chroma initialization", flush=True)
 
         import chromadb
         from fastembed import TextEmbedding
-
-        print("RAG: creating Chroma client", flush=True)
 
         client = chromadb.PersistentClient(
             path=str(ROOT / settings.chroma_dir)
@@ -40,10 +41,11 @@ def get_collection():
 
         print("RAG: Chroma client ready", flush=True)
 
-        print("RAG: loading FastEmbed MiniLM", flush=True)
+        print(f"RAG: loading FastEmbed {MODEL_NAME}", flush=True)
 
         embedding_model = TextEmbedding(
-            model_name=MODEL_NAME
+            model_name=MODEL_NAME,
+            threads=1
         )
 
         print("RAG: embedding model ready", flush=True)
@@ -60,12 +62,15 @@ def get_collection():
 def embed_texts(texts: list[str]):
     get_collection()
 
-    embeddings = embedding_model.embed(texts)
+    embeddings = embedding_model.embed(
+        texts,
+        batch_size=1
+    )
 
     return [embedding.tolist() for embedding in embeddings]
 
 
-def chunk_text(text: str, size: int = 700, overlap: int = 100):
+def chunk_text(text: str, size: int = 500, overlap: int = 50):
     words = text.split()
     chunks = []
 
@@ -109,7 +114,7 @@ def index_documents(documents: list[dict]):
         ids=ids,
         documents=texts,
         embeddings=embeddings,
-        metadatas=metadatas,
+        metadatas=metadatas
     )
 
     return len(ids)
@@ -122,48 +127,30 @@ def retrieve(query: str, k: int = 5):
     source_hint = None
 
     if any(word in query_lower for word in [
-        "experience",
-        "work experience",
-        "internship",
-        "job",
-        "role",
-        "worked",
-        "career",
+        "experience", "work experience", "internship",
+        "job", "role", "worked", "career"
     ]):
         source_hint = "experience"
 
     elif any(word in query_lower for word in [
-        "education",
-        "degree",
-        "college",
-        "university",
-        "school",
-        "study",
-        "studied",
+        "education", "degree", "college",
+        "university", "school", "study", "studied"
     ]):
         source_hint = "education"
 
     elif any(word in query_lower for word in [
-        "skill",
-        "skills",
-        "technology",
-        "technologies",
-        "programming",
+        "skill", "skills", "technology",
+        "technologies", "programming"
     ]):
         source_hint = "skills"
 
     elif any(word in query_lower for word in [
-        "project",
-        "projects",
-        "built",
-        "developed",
+        "project", "projects", "built", "developed"
     ]):
         source_hint = "projects"
 
     elif any(word in query_lower for word in [
-        "certificate",
-        "certification",
-        "certifications",
+        "certificate", "certification", "certifications"
     ]):
         source_hint = "certificates"
 
@@ -176,14 +163,14 @@ def retrieve(query: str, k: int = 5):
 
         for document, metadata in zip(
             all_data.get("documents", []),
-            all_data.get("metadatas", []),
+            all_data.get("metadatas", [])
         ):
             source = (metadata or {}).get("source", "")
 
             if source.startswith("project:"):
                 project_documents.append({
                     "text": document,
-                    "source": source,
+                    "source": source
                 })
 
         return project_documents[:k]
@@ -197,14 +184,14 @@ def retrieve(query: str, k: int = 5):
 
         for document, metadata in zip(
             all_data.get("documents", []),
-            all_data.get("metadatas", []),
+            all_data.get("metadatas", [])
         ):
             source = (metadata or {}).get("source", "")
 
             if source == "skills":
                 skill_documents.append({
                     "text": document,
-                    "source": source,
+                    "source": source
                 })
 
         return skill_documents
@@ -215,12 +202,12 @@ def retrieve(query: str, k: int = 5):
         result = collection.query(
             query_embeddings=[query_embedding],
             n_results=k,
-            where={"source": source_hint},
+            where={"source": source_hint}
         )
     else:
         result = collection.query(
             query_embeddings=[query_embedding],
-            n_results=k,
+            n_results=k
         )
 
     documents = result.get("documents", [[]])[0]
@@ -232,10 +219,7 @@ def retrieve(query: str, k: int = 5):
             "source": (metadata or {}).get(
                 "source",
                 "portfolio"
-            ),
+            )
         }
-        for document, metadata in zip(
-            documents,
-            metadatas,
-        )
+        for document, metadata in zip(documents, metadatas)
     ]
