@@ -19,5 +19,10 @@ class Settings(BaseSettings):
     smtp_password: str = ""
     contact_receiver_email: str = ""
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
+    gemini_api_key: str = ""
+    gemini_embedding_model: str = "gemini-embedding-001"
+    supabase_url: str = ""
+    supabase_service_role_key: str = ""
+    supabase_bucket: str = "portfoliouploads"
 
 settings = Settings()
