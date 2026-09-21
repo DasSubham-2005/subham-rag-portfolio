@@ -89,7 +89,7 @@ export default function Navbar({ profile, dark, setDark }) {
         <a
           href={
             profile?.linkedin_url ||
-            "https://linkedin.com/in/subham-das-a316422b"
+            "https://www.linkedin.com/in/subham-das-a316422b4"
           }
           target="_blank"
           rel="noreferrer"
