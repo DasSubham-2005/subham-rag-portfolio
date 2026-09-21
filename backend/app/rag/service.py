@@ -464,9 +464,10 @@ def retrieve(
 
     if source_hint == "skills":
 
-        return get_all_source_documents(
-            "skills"
-        )
+       skill_results = get_all_source_documents("skills")
+       custom_results = get_all_source_documents("custom:")
+
+       return (skill_results + custom_results)[:k]
 
 
     # --------------------------------------------------------
