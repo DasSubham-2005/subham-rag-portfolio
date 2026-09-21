@@ -1,12 +1,14 @@
 from pathlib import Path
 import os
+import re
 import threading
-import requests
+import hashlib
 import numpy as np
 
 os.environ["ANONYMIZED_TELEMETRY"] = "False"
 
 from app.core.config import settings
+
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -16,9 +18,12 @@ collection = None
 _init_lock = threading.Lock()
 _rebuild_lock = threading.Lock()
 
-GEMINI_EMBEDDING_MODEL = "gemini-embedding-001"
 EMBEDDING_DIMENSION = 768
 
+
+# ============================================================
+# CHROMA
+# ============================================================
 
 def get_collection():
     global client, collection
@@ -30,7 +35,10 @@ def get_collection():
         if collection is not None:
             return collection
 
-        print("RAG: starting Chroma initialization", flush=True)
+        print(
+            "RAG: starting Chroma initialization",
+            flush=True,
+        )
 
         import chromadb
 
@@ -38,7 +46,10 @@ def get_collection():
             path=str(ROOT / settings.chroma_dir)
         )
 
-        print("RAG: Chroma client ready", flush=True)
+        print(
+            "RAG: Chroma client ready",
+            flush=True,
+        )
 
         collection = client.get_or_create_collection(
             name="portfolio_knowledge_v2"
@@ -46,85 +57,56 @@ def get_collection():
 
         print(
             f"RAG: collection ready ({collection.count()} chunks)",
-            flush=True
+            flush=True,
         )
 
     return collection
 
 
-def gemini_embed(texts: list[str], task_type: str):
+# ============================================================
+# LIGHTWEIGHT LOCAL EMBEDDINGS
+# ============================================================
+
+def local_embed(texts: list[str]):
     """
-    Generate embeddings using Gemini API.
+    Lightweight local text embeddings.
 
-    No local embedding model is loaded.
-    This keeps RAM usage low for 512MB hosting.
+    No Gemini API.
+    No external embedding service.
+    No ML model.
+    No extra package.
+
+    Uses hashed word features with cosine normalization.
     """
-
-    api_key = getattr(settings, "gemini_api_key", "")
-
-    if not api_key:
-        raise RuntimeError(
-            "GEMINI_API_KEY is not configured."
-        )
-
-    url = (
-        "https://generativelanguage.googleapis.com/"
-        "v1beta/models/gemini-embedding-001:embedContent"
-    )
-
-    headers = {
-        "Content-Type": "application/json",
-        "x-goog-api-key": api_key,
-    }
 
     embeddings = []
 
     for text in texts:
 
-        payload = {
-            "model": "models/gemini-embedding-001",
-            "content": {
-                "parts": [
-                    {
-                        "text": text
-                    }
-                ]
-            },
-            "taskType": task_type,
-            "outputDimensionality": EMBEDDING_DIMENSION,
-        }
-
-        response = requests.post(
-            url,
-            headers=headers,
-            json=payload,
-            timeout=30,
+        vector = np.zeros(
+            EMBEDDING_DIMENSION,
+            dtype=np.float32,
         )
 
-        if not response.ok:
-            raise RuntimeError(
-                f"Gemini embedding API error "
-                f"{response.status_code}: {response.text}"
-            )
-
-        data = response.json()
-
-        values = (
-            data.get("embedding", {})
-            .get("values")
+        words = re.findall(
+            r"\b[a-zA-Z0-9+#.-]+\b",
+            text.lower(),
         )
 
-        if not values:
-            raise RuntimeError(
-                "Gemini returned an empty embedding."
-            )
+        for word in words:
+
+            digest = hashlib.md5(
+                word.encode("utf-8")
+            ).digest()
+
+            index = int.from_bytes(
+                digest[:4],
+                "little",
+            ) % EMBEDDING_DIMENSION
+
+            vector[index] += 1.0
 
         # Normalize for cosine similarity.
-        vector = np.asarray(
-            values,
-            dtype=np.float32
-        )
-
         norm = np.linalg.norm(vector)
 
         if norm > 0:
@@ -138,18 +120,16 @@ def gemini_embed(texts: list[str], task_type: str):
 
 
 def embed_documents(texts: list[str]):
-    return gemini_embed(
-        texts,
-        "RETRIEVAL_DOCUMENT"
-    )
+    return local_embed(texts)
 
 
 def embed_query(text: str):
-    return gemini_embed(
-        [text],
-        "RETRIEVAL_QUERY"
-    )[0]
+    return local_embed([text])[0]
 
+
+# ============================================================
+# TEXT CHUNKING
+# ============================================================
 
 def chunk_text(
     text: str,
@@ -164,7 +144,7 @@ def chunk_text(
 
     step = max(
         1,
-        size - overlap
+        size - overlap,
     )
 
     while start < len(words):
@@ -183,8 +163,12 @@ def chunk_text(
     return chunks
 
 
+# ============================================================
+# INDEX DOCUMENTS
+# ============================================================
+
 def index_documents(
-    documents: list[dict]
+    documents: list[dict],
 ):
     collection = get_collection()
 
@@ -214,8 +198,8 @@ def index_documents(
         return 0
 
     print(
-        f"RAG: generating {len(texts)} embeddings...",
-        flush=True
+        f"RAG: generating {len(texts)} local embeddings...",
+        flush=True,
     )
 
     embeddings = embed_documents(
@@ -231,11 +215,15 @@ def index_documents(
 
     print(
         f"RAG: indexed {len(ids)} chunks",
-        flush=True
+        flush=True,
     )
 
     return len(ids)
 
+
+# ============================================================
+# AUTOMATIC REBUILD
+# ============================================================
 
 def auto_rebuild_if_empty():
 
@@ -269,10 +257,12 @@ def auto_rebuild_if_empty():
                 )
 
                 if not documents:
+
                     print(
                         "RAG: no portfolio data found.",
                         flush=True,
                     )
+
                     return
 
                 count = index_documents(
@@ -286,6 +276,7 @@ def auto_rebuild_if_empty():
                 )
 
             finally:
+
                 db.close()
 
         except Exception as e:
@@ -296,9 +287,14 @@ def auto_rebuild_if_empty():
             )
 
 
+# ============================================================
+# GET DOCUMENTS BY SOURCE
+# ============================================================
+
 def get_all_source_documents(
-    source_prefix: str
+    source_prefix: str,
 ):
+
     collection = get_collection()
 
     data = collection.get(
@@ -319,12 +315,13 @@ def get_all_source_documents(
             metadata or {}
         ).get(
             "source",
-            ""
+            "",
         )
 
         if source.startswith(
             source_prefix
         ):
+
             results.append({
                 "text": document,
                 "source": source,
@@ -332,6 +329,10 @@ def get_all_source_documents(
 
     return results
 
+
+# ============================================================
+# RETRIEVAL
+# ============================================================
 
 def retrieve(
     query: str,
@@ -342,6 +343,7 @@ def retrieve(
 
     # Automatically restore RAG if empty.
     if collection.count() == 0:
+
         auto_rebuild_if_empty()
 
     if collection.count() == 0:
@@ -350,6 +352,11 @@ def retrieve(
     query_lower = query.lower()
 
     source_hint = None
+
+
+    # --------------------------------------------------------
+    # EXPERIENCE
+    # --------------------------------------------------------
 
     if any(
         word in query_lower
@@ -363,7 +370,13 @@ def retrieve(
             "career",
         ]
     ):
+
         source_hint = "experience"
+
+
+    # --------------------------------------------------------
+    # EDUCATION
+    # --------------------------------------------------------
 
     elif any(
         word in query_lower
@@ -377,7 +390,13 @@ def retrieve(
             "studied",
         ]
     ):
+
         source_hint = "education"
+
+
+    # --------------------------------------------------------
+    # SKILLS
+    # --------------------------------------------------------
 
     elif any(
         word in query_lower
@@ -389,7 +408,13 @@ def retrieve(
             "programming",
         ]
     ):
+
         source_hint = "skills"
+
+
+    # --------------------------------------------------------
+    # PROJECTS
+    # --------------------------------------------------------
 
     elif any(
         word in query_lower
@@ -400,7 +425,13 @@ def retrieve(
             "developed",
         ]
     ):
+
         source_hint = "projects"
+
+
+    # --------------------------------------------------------
+    # CERTIFICATES
+    # --------------------------------------------------------
 
     elif any(
         word in query_lower
@@ -410,9 +441,14 @@ def retrieve(
             "certifications",
         ]
     ):
+
         source_hint = "certificates"
 
-    # Project queries
+
+    # --------------------------------------------------------
+    # PROJECT QUERIES
+    # --------------------------------------------------------
+
     if source_hint == "projects":
 
         results = get_all_source_documents(
@@ -421,22 +457,31 @@ def retrieve(
 
         return results[:k]
 
-    # Skills queries
+
+    # --------------------------------------------------------
+    # SKILLS QUERIES
+    # --------------------------------------------------------
+
     if source_hint == "skills":
 
         return get_all_source_documents(
             "skills"
         )
 
-    # Normal semantic retrieval
+
+    # --------------------------------------------------------
+    # SEMANTIC RETRIEVAL
+    # --------------------------------------------------------
+
     query_embedding = embed_query(
         query
     )
 
     n_results = min(
         k,
-        collection.count()
+        collection.count(),
     )
+
 
     if source_hint:
 
@@ -459,15 +504,17 @@ def retrieve(
             n_results=n_results,
         )
 
+
     documents = result.get(
         "documents",
-        [[]]
+        [[]],
     )[0]
 
     metadatas = result.get(
         "metadatas",
-        [[]]
+        [[]],
     )[0]
+
 
     return [
         {
@@ -476,9 +523,10 @@ def retrieve(
                 metadata or {}
             ).get(
                 "source",
-                "portfolio"
+                "portfolio",
             ),
         }
+
         for document, metadata in zip(
             documents,
             metadatas,
