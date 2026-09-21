@@ -159,7 +159,7 @@ function Layout({ section, setSection, onLogout }) {
   );
 }
 function AdminSection({ section }) {
-  const token = localStorage.getItem(TOKEN_KEY);
+  const token = sessionStorage.getItem(TOKEN_KEY);
   const [data, setData] = useState(null);
   const [stats, setStats] = useState(null);
   const [message, setMessage] = useState("");
