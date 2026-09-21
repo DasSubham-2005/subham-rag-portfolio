@@ -221,7 +221,11 @@ async def assistant(request: Request, data: dict, db:Session=Depends(get_db)):
     q=(data.get("question") or "").strip()
     if not q: raise HTTPException(400,"Question is required")
     context=retrieve(q,5)
-    return {"answer":await answer(q,context),"sources":[x["source"] for x in context]}
+    return {
+       "answer": await answer(q, context),
+       "sources": [x["source"] for x in context],
+       "context": [x["text"] for x in context],
+    }
 
 from app.services.email import send_contact_email
 
