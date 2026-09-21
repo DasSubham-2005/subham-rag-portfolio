@@ -7,6 +7,7 @@ from app.models.entities import (
     Experience,
     Education,
     Certificate,
+    CustomKnowledge,
 )
 
 from app.rag.service import index_documents
@@ -88,6 +89,16 @@ def build_documents(db: Session):
                 f"Credential: {x.credential_url}."
             ),
         })
+
+    for x in db.query(CustomKnowledge).all():
+        docs.append({
+            "id": f"custom-knowledge-{x.id}",
+            "source": f"custom:{x.title}",
+           "text": (
+              f"Knowledge title: {x.title}. "
+              f"Knowledge content: {x.content}."
+            ),
+         })
 
     return docs
 

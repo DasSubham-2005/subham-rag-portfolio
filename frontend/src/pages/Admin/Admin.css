@@ -563,3 +563,122 @@
     width: 100%;
   }
 }
+
+/* =========================
+   CUSTOM KNOWLEDGE
+========================= */
+
+.knowledge-manager {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.knowledge-manager .admin-card {
+  padding: 22px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--panel);
+}
+
+.knowledge-manager .admin-card h3 {
+  margin: 0 0 8px;
+  font-size: 16px;
+}
+
+.knowledge-manager .admin-card p {
+  margin: 0 0 18px;
+  color: var(--muted);
+  line-height: 1.6;
+  font-size: 13px;
+}
+
+.knowledge-manager .form-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+.knowledge-manager .admin-input,
+.knowledge-manager .admin-textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 13px 15px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--bg);
+  color: var(--text);
+  outline: none;
+  font: inherit;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.knowledge-manager .admin-input:focus,
+.knowledge-manager .admin-textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(35, 169, 255, 0.1);
+}
+
+.knowledge-manager .admin-textarea {
+  resize: vertical;
+  min-height: 150px;
+  line-height: 1.6;
+}
+
+.knowledge-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.knowledge-list .admin-card {
+  padding: 20px;
+}
+
+.knowledge-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.knowledge-header > div {
+  flex: 1;
+  min-width: 0;
+}
+
+.knowledge-header h3 {
+  margin: 0 0 8px;
+  color: var(--text);
+}
+
+.knowledge-header p {
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: var(--muted);
+  line-height: 1.7;
+  font-size: 13px;
+}
+
+.knowledge-header .btn.danger {
+  flex-shrink: 0;
+}
+
+@media (max-width: 700px) {
+  .knowledge-manager .admin-card {
+    padding: 16px;
+  }
+
+  .knowledge-header {
+    flex-direction: column;
+  }
+
+  .knowledge-header .btn.danger {
+    width: 100%;
+    justify-content: center;
+  }
+}

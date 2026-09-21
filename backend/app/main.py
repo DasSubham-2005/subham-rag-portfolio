@@ -20,6 +20,7 @@ from app.models.entities import (
     Certificate,
     Media,
     ContactMessage,
+    CustomKnowledge,
 )
 from app.schemas.all import LoginIn, TokenOut, ProfileIn, SkillIn, ProjectIn, ExperienceIn, EducationIn, CertificateIn
 from app.services.storage import save_upload, delete_upload
@@ -60,7 +61,14 @@ def portfolio(db: Session = Depends(get_db)):
 def stats(_: str = Depends(require_admin), db: Session = Depends(get_db)):
     return {"projects":db.query(Project).count(),"skills":db.query(Skill).count(),"certificates":db.query(Certificate).count(),"experience":db.query(Experience).count(),"media":db.query(Media).count(),"messages": db.query(ContactMessage).count()}
 
-MODEL_MAP = {"skills":Skill,"projects":Project,"experience":Experience,"education":Education,"certificates":Certificate}
+MODEL_MAP = {
+    "skills": Skill,
+    "projects": Project,
+    "experience": Experience,
+    "education": Education,
+    "certificates": Certificate,
+    "custom-knowledge": CustomKnowledge,
+}
 
 def crud_create(table, data, db):
     obj=table(**data); db.add(obj); db.commit(); db.refresh(obj); return serialize(obj)
@@ -193,6 +201,15 @@ async def delete_media(
         "ok": True,
         "message": "Media deleted successfully."
     }
+
+@app.get("/api/admin/custom-knowledge")
+def get_custom_knowledge(
+    _: str = Depends(require_admin),
+    db: Session = Depends(get_db)
+):
+    return db.query(CustomKnowledge).order_by(
+        CustomKnowledge.id.desc()
+    ).all()
 
 @app.post("/api/admin/rebuild-rag")
 def rebuild_rag(_: str=Depends(require_admin), db:Session=Depends(get_db)):

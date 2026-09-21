@@ -53,6 +53,10 @@ const empty = {
     credential_url: "",
     file_url: "",
   },
+  "custom-knowledge": {
+   title: "",
+   content: "",
+   },
 };
 const labels = {
   skills: "Skills",
@@ -61,6 +65,7 @@ const labels = {
   education: "Education",
   certificates: "Certificates",
   contacts: "Contact Messages",
+  "custom-knowledge": "Custom Knowledge",
 };
 function Login({ onLogin }) {
   const [u, setU] = useState("");
@@ -746,14 +751,152 @@ function MediaManager({ token, upload }) {
   );
 }
 
+function CustomKnowledgeManager({ token }) {
+  const [items, setItems] = useState([]);
+  const [title, setTitle] = useState("");
+  const [content, setContent] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  const load = async () => {
+    try {
+      const data = await api("/api/admin/custom-knowledge", { token });
+      setItems(data);
+    } catch (e) {
+      console.error("CUSTOM KNOWLEDGE LOAD ERROR:", e);
+    }
+  };
+
+  useEffect(() => {
+    load();
+  }, []);
+
+  const add = async () => {
+    if (!title.trim() || !content.trim()) {
+      alert("Please enter both title and content.");
+      return;
+    }
+
+    try {
+      setBusy(true);
+
+      await api("/api/admin/custom-knowledge", {
+        method: "POST",
+        token,
+        body: {
+          title: title.trim(),
+          content: content.trim(),
+        },
+      });
+
+      setTitle("");
+      setContent("");
+      await load();
+    } catch (e) {
+      alert(e.message);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const remove = async (id) => {
+    if (!window.confirm("Delete this knowledge permanently?")) return;
+
+    try {
+      await api(`/api/admin/custom-knowledge/${id}`, {
+        method: "DELETE",
+        token,
+      });
+
+      setItems((prev) => prev.filter((x) => x.id !== id));
+    } catch (e) {
+      alert(e.message);
+    }
+  };
+
+  return (
+    <div className="knowledge-manager">
+      <div className="admin-card">
+        <h3>Add Custom Knowledge</h3>
+
+        <input
+          className="admin-input"
+          placeholder="Knowledge title"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+        />
+
+        <textarea
+          className="admin-textarea"
+          placeholder="Write the information you want Subham AI to know..."
+          value={content}
+          onChange={(e) => setContent(e.target.value)}
+          rows={8}
+        />
+
+        <button
+          className="btn primary"
+          onClick={add}
+          disabled={busy}
+        >
+          <Save />
+          {busy ? "Saving..." : "Save Knowledge"}
+        </button>
+      </div>
+
+      <div className="knowledge-list">
+        {items.map((item) => (
+          <article className="admin-card" key={item.id}>
+            <div className="knowledge-header">
+              <h3>{item.title}</h3>
+
+              <button
+                className="btn danger"
+                onClick={() => remove(item.id)}
+              >
+                <Trash2 />
+                Delete
+              </button>
+            </div>
+
+            <p>{item.content}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 function RagManager({ token }) {
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState("");
+
+  const [items, setItems] = useState([]);
+  const [title, setTitle] = useState("");
+  const [content, setContent] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  const loadKnowledge = async () => {
+    try {
+      const data = await api("/api/admin/custom-knowledge", { token });
+      setItems(data);
+    } catch (e) {
+      console.error("CUSTOM KNOWLEDGE LOAD ERROR:", e);
+    }
+  };
+
+  useEffect(() => {
+    loadKnowledge();
+  }, []);
+
   const rebuild = async () => {
     setBusy(true);
+
     try {
-      const r = await api("/api/admin/rebuild-rag", { method: "POST", token });
+      const r = await api("/api/admin/rebuild-rag", {
+        method: "POST",
+        token,
+      });
+
       setResult(
         `Knowledge base rebuilt. ${r.chunks_indexed || 0} chunks indexed.`,
       );
@@ -763,16 +906,69 @@ function RagManager({ token }) {
       setBusy(false);
     }
   };
+
+  const addKnowledge = async () => {
+    if (!title.trim() || !content.trim()) {
+      alert("Please enter both title and content.");
+      return;
+    }
+
+    try {
+      setSaving(true);
+
+      await api("/api/admin/custom-knowledge", {
+        method: "POST",
+        token,
+        body: {
+          title: title.trim(),
+          content: content.trim(),
+        },
+      });
+
+      setTitle("");
+      setContent("");
+
+      await loadKnowledge();
+    } catch (e) {
+      alert(e.message);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const deleteKnowledge = async (id) => {
+    if (!window.confirm("Delete this knowledge permanently?")) return;
+
+    try {
+      await api(`/api/admin/custom-knowledge/${id}`, {
+        method: "DELETE",
+        token,
+      });
+
+      setItems((prev) => prev.filter((item) => item.id !== id));
+    } catch (e) {
+      alert(e.message);
+    }
+  };
+
   return (
     <div className="rag-manager">
+      {/* RAG HEADER */}
       <div className="rag-hero">
         <Brain />
+
         <h2>Portfolio RAG Knowledge Base</h2>
+
         <p>
           The assistant retrieves your portfolio information from the vector
           database before generating an answer.
         </p>
-        <button className="btn primary" onClick={rebuild} disabled={busy}>
+
+        <button
+          className="btn primary"
+          onClick={rebuild}
+          disabled={busy}
+        >
           {busy ? (
             <>
               <RefreshCw className="spin" /> Rebuilding…
@@ -783,10 +979,76 @@ function RagManager({ token }) {
             </>
           )}
         </button>
+
         {result && <div className="admin-message">{result}</div>}
       </div>
+
+      {/* CUSTOM KNOWLEDGE */}
+      <div className="admin-card">
+        <div className="section-heading">
+          <div>
+            <h3>Custom Knowledge</h3>
+            <p>
+              Add information that is not stored in your regular portfolio
+              sections.
+            </p>
+          </div>
+        </div>
+
+        <div className="form-grid">
+          <input
+            className="admin-input"
+            placeholder="Knowledge title"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+          />
+
+          <textarea
+            className="admin-textarea"
+            placeholder="Write information for Subham AI..."
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            rows={7}
+          />
+        </div>
+
+        <button
+          className="btn primary"
+          onClick={addKnowledge}
+          disabled={saving}
+        >
+          <Save />
+          {saving ? "Saving..." : "Save Knowledge"}
+        </button>
+      </div>
+
+      {/* KNOWLEDGE LIST */}
+      <div className="knowledge-list">
+        {items.map((item) => (
+          <article className="admin-card" key={item.id}>
+            <div className="knowledge-header">
+              <div>
+                <h3>{item.title}</h3>
+                <p>{item.content}</p>
+              </div>
+
+              <button
+                className="btn danger"
+                onClick={() => deleteKnowledge(item.id)}
+              >
+                <Trash2 />
+                Delete
+              </button>
+            </div>
+          </article>
+        ))}
+      </div>
+
+      {/* RAG PIPELINE */}
       <div className="rag-pipeline">
         <span>Portfolio DB</span>
+        <i>→</i>
+        <span>Custom Knowledge</span>
         <i>→</i>
         <span>Document chunks</span>
         <i>→</i>
@@ -801,6 +1063,8 @@ function RagManager({ token }) {
     </div>
   );
 }
+
+
 export default function Admin() {
   const [token, setToken] = useState(sessionStorage.getItem(TOKEN_KEY));
   const [section, setSection] = useState("dashboard");

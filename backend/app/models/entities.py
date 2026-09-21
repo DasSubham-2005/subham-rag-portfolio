@@ -86,3 +86,19 @@ class ContactMessage(Base):
         default=datetime.utcnow
     )
     is_read: Mapped[bool] = mapped_column(Boolean, default=False)
+
+class CustomKnowledge(Base):
+    __tablename__ = "custom_knowledge"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    title: Mapped[str] = mapped_column(String(240))
+    content: Mapped[str] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        default=datetime.utcnow
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        default=datetime.utcnow,
+        onupdate=datetime.utcnow
+    )
