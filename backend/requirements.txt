@@ -14,3 +14,4 @@ psycopg==3.2.13
 psycopg-binary==3.2.13
 requests==2.32.3
 numpy==2.2.1
+resend

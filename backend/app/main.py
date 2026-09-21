@@ -22,7 +22,7 @@ from app.models.entities import (
     ContactMessage,
 )
 from app.schemas.all import LoginIn, TokenOut, ProfileIn, SkillIn, ProjectIn, ExperienceIn, EducationIn, CertificateIn
-from app.services.storage import save_upload
+from app.services.storage import save_upload, delete_upload
 from app.rag.ingest import rebuild
 from app.rag.service import retrieve
 from app.services.llm import answer
@@ -72,10 +72,35 @@ def crud_update(table, item_id, data, db):
         if hasattr(obj,k): setattr(obj,k,v)
     db.commit(); db.refresh(obj); return serialize(obj)
 
-def crud_delete(table,item_id,db):
-    obj=db.get(table,item_id)
-    if not obj: raise HTTPException(404,"Item not found")
-    db.delete(obj); db.commit(); return {"ok":True}
+def crud_delete(table, item_id, db):
+    obj = db.get(table, item_id)
+
+    if not obj:
+        raise HTTPException(404, "Item not found")
+
+    # Delete attached Supabase files
+    file_urls = []
+
+    if hasattr(obj, "thumbnail_url") and obj.thumbnail_url:
+        file_urls.append(obj.thumbnail_url)
+
+    if hasattr(obj, "video_url") and obj.video_url:
+        file_urls.append(obj.video_url)
+
+    if hasattr(obj, "file_url") and obj.file_url:
+        file_urls.append(obj.file_url)
+
+    for url in file_urls:
+        try:
+            import asyncio
+            asyncio.run(delete_upload(url))
+        except Exception as e:
+            print(f"Storage delete failed: {e}")
+
+    db.delete(obj)
+    db.commit()
+
+    return {"ok": True}
 
 for path, table in MODEL_MAP.items():
     def make_create(t):
@@ -113,6 +138,61 @@ async def upload(files: list[UploadFile]=File(...), _: str=Depends(require_admin
 @app.get("/api/admin/media")
 def media(_: str=Depends(require_admin), db:Session=Depends(get_db)):
     return [serialize(x) for x in db.query(Media).order_by(Media.created_at.desc()).all()]
+
+@app.delete("/api/admin/media/{media_id}")
+async def delete_media(
+    media_id: int,
+    _: str = Depends(require_admin),
+    db: Session = Depends(get_db)
+):
+    media = db.get(Media, media_id)
+
+    if not media:
+        raise HTTPException(404, "Media not found")
+
+    file_url = media.url
+
+    # Remove references from Profile
+    profile = db.query(Profile).first()
+
+    if profile:
+        if getattr(profile, "photo_url", "") == file_url:
+            profile.photo_url = ""
+
+        if getattr(profile, "resume_url", "") == file_url:
+            profile.resume_url = ""
+
+    # Remove references from Projects
+    projects = db.query(Project).all()
+
+    for project in projects:
+        if project.thumbnail_url == file_url:
+            project.thumbnail_url = ""
+
+        if project.video_url == file_url:
+            project.video_url = ""
+
+    # Remove references from Certificates
+    certificates = db.query(Certificate).all()
+
+    for certificate in certificates:
+        if certificate.file_url == file_url:
+            certificate.file_url = ""
+
+    # Delete physical file from Supabase
+    try:
+        await delete_upload(file_url)
+    except Exception as e:
+        print(f"Supabase media delete failed: {e}")
+
+    # Delete Media database record
+    db.delete(media)
+    db.commit()
+
+    return {
+        "ok": True,
+        "message": "Media deleted successfully."
+    }
 
 @app.post("/api/admin/rebuild-rag")
 def rebuild_rag(_: str=Depends(require_admin), db:Session=Depends(get_db)):
@@ -158,21 +238,17 @@ def contact_message(data: dict, db: Session = Depends(get_db)):
 
     try:
         send_contact_email(
-            name=name,
-            email=email,
-            subject=subject,
-            message=message,
+           name=name,
+           email=email,
+           subject=subject,
+           message=message
         )
     except Exception as e:
         print(f"Contact email failed: {e}")
-        raise HTTPException(
-            status_code=503,
-            detail="Message saved, but email delivery failed."
-        )
 
     return {
-        "success": True,
-        "message": "Your message has been sent successfully."
+       "success": True,
+       "message": "Your message has been sent successfully."
     }
 
 @app.get("/api/admin/contact-messages")

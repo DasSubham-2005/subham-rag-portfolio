@@ -1,6 +1,4 @@
-import smtplib
-from email.message import EmailMessage
-
+import resend
 from app.core.config import settings
 
 
@@ -9,30 +7,26 @@ def send_contact_email(
     email: str,
     subject: str,
     message: str,
-) -> None:
-    msg = EmailMessage()
+):
+    resend.api_key = settings.resend_api_key
 
-    msg["From"] = settings.smtp_username
-    msg["To"] = settings.contact_receiver_email
-    msg["Reply-To"] = email
-    msg["Subject"] = f"Portfolio Contact: {subject or 'New Message'}"
+    params = {
+        "from": settings.resend_from_email,
+        "to": [settings.contact_receiver_email],
+        "subject": subject or f"New message from {name}",
+        "reply_to": email,
+        "html": f"""
+        <h2>New Portfolio Contact Message</h2>
 
-    msg.set_content(
-        f"""New message from your portfolio website.
+        <p><strong>Name:</strong> {name}</p>
+        <p><strong>Email:</strong> {email}</p>
+        <p><strong>Subject:</strong> {subject}</p>
 
-Name: {name}
-Email: {email}
-Subject: {subject or 'No subject'}
+        <hr>
 
-Message:
-{message}
-"""
-    )
+        <p><strong>Message:</strong></p>
+        <p>{message}</p>
+        """,
+    }
 
-    with smtplib.SMTP(settings.smtp_host, settings.smtp_port) as server:
-        server.starttls()
-        server.login(
-            settings.smtp_username,
-            settings.smtp_password,
-        )
-        server.send_message(msg)
+    return resend.Emails.send(params)

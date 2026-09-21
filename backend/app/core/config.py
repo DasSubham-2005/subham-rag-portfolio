@@ -23,6 +23,8 @@ class Settings(BaseSettings):
     gemini_embedding_model: str = "gemini-embedding-001"
     supabase_url: str = ""
     supabase_service_role_key: str = ""
-    supabase_bucket: str = "portfoliouploads"
+    supabase_bucket: str = "portfolio-uploads"
+    resend_api_key: str = ""
+    resend_from_email: str = "onboarding@resend.dev"
 
 settings = Settings()

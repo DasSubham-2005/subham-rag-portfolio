@@ -654,6 +654,7 @@ function ContactMessages({ messages, token, reload }) {
 
 function MediaManager({ token, upload }) {
   const [items, setItems] = useState([]);
+  const [deleting, setDeleting] = useState(null);
 
   const load = () => {
     api("/api/admin/media", { token })
@@ -664,18 +665,45 @@ function MediaManager({ token, upload }) {
   useEffect(() => {
     load();
   }, []);
+
   const add = async (e) => {
-    if (e.target.files?.length) {
+    if (!e.target.files?.length) return;
+
+    try {
       await upload(e.target.files);
       load();
+      e.target.value = "";
+    } catch (err) {
+      alert(err.message);
     }
   };
+
+  const remove = async (id) => {
+    if (!window.confirm("Delete this media file permanently?")) return;
+
+    try {
+      setDeleting(id);
+
+      await api(`/api/admin/media/${id}`, {
+        method: "DELETE",
+        token,
+      });
+
+      setItems((prev) => prev.filter((x) => x.id !== id));
+    } catch (e) {
+      alert(e.message);
+    } finally {
+      setDeleting(null);
+    }
+  };
+
   return (
     <div className="media-manager">
       <label className="upload-big">
         <Upload />
         <b>Upload images, videos or PDFs</b>
         <span>Select multiple files at once</span>
+
         <input
           type="file"
           multiple
@@ -683,21 +711,42 @@ function MediaManager({ token, upload }) {
           onChange={add}
         />
       </label>
+
       <div className="media-grid">
         {items.map((x) => (
           <article key={x.id}>
             <span>{x.media_type}</span>
-            {x.media_type === "image" && <img src={asset(x.url)} alt="" />}
+
+            {x.media_type === "image" && (
+              <img src={asset(x.url)} alt="" />
+            )}
+
             <b>{x.filename}</b>
-            <a href={asset(x.url)} target="_blank" rel="noreferrer">
+
+            <a
+              href={asset(x.url)}
+              target="_blank"
+              rel="noreferrer"
+            >
               Open file <ExternalLink />
             </a>
+
+            <button
+              className="btn danger"
+              onClick={() => remove(x.id)}
+              disabled={deleting === x.id}
+            >
+              <Trash2 />
+              {deleting === x.id ? "Deleting..." : "Delete"}
+            </button>
           </article>
         ))}
       </div>
     </div>
   );
 }
+
+
 function RagManager({ token }) {
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState("");
