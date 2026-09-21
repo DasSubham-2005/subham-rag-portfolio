@@ -245,7 +245,7 @@ def auto_rebuild_if_empty():
 
         try:
 
-            from app.core.database import SessionLocal
+            from app.db.session import SessionLocal
             from app.rag.ingest import build_documents
 
             db = SessionLocal()
