@@ -465,9 +465,10 @@ def retrieve(
     if source_hint == "skills":
 
        skill_results = get_all_source_documents("skills")
+       project_results = get_all_source_documents("project:")
        custom_results = get_all_source_documents("custom:")
 
-       return (skill_results + custom_results)[:k]
+       return (skill_results + project_results + custom_results)[:k]
 
 
     # --------------------------------------------------------
@@ -533,3 +534,4 @@ def retrieve(
             metadatas,
         )
     ]
+
