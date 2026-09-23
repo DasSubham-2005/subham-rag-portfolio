@@ -217,14 +217,27 @@ def rebuild_rag(_: str=Depends(require_admin), db:Session=Depends(get_db)):
 
 @app.post("/api/assistant")
 @limiter.limit("10/minute")
-async def assistant(request: Request, data: dict, db:Session=Depends(get_db)):
-    q=(data.get("question") or "").strip()
-    if not q: raise HTTPException(400,"Question is required")
-    context=retrieve(q,5)
+async def assistant(
+    request: Request,
+    data: dict,
+    db: Session = Depends(get_db)
+):
+    q = (data.get("question") or "").strip()
+
+    if not q:
+        raise HTTPException(
+            400,
+            "Question is required"
+        )
+
+    context = retrieve(q, 5)
+
     return {
-       "answer": await answer(q, context),
-       "sources": [x["source"] for x in context],
-       "context": [x["text"] for x in context],
+        "answer": await answer(q, context),
+        "sources": list(dict.fromkeys(
+            x["source"]
+            for x in context
+        )),
     }
 
 from app.services.email import send_contact_email

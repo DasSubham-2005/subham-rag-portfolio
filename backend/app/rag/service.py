@@ -343,7 +343,6 @@ def retrieve(
 
     # Automatically restore RAG if empty.
     if collection.count() == 0:
-
         auto_rebuild_if_empty()
 
     if collection.count() == 0:
@@ -352,7 +351,6 @@ def retrieve(
     query_lower = query.lower()
 
     source_hint = None
-
 
     # --------------------------------------------------------
     # EXPERIENCE
@@ -364,7 +362,9 @@ def retrieve(
             "experience",
             "work experience",
             "internship",
+            "internships",
             "job",
+            "jobs",
             "role",
             "worked",
             "career",
@@ -372,7 +372,6 @@ def retrieve(
     ):
 
         source_hint = "experience"
-
 
     # --------------------------------------------------------
     # EDUCATION
@@ -388,11 +387,11 @@ def retrieve(
             "school",
             "study",
             "studied",
+            "academic",
         ]
     ):
 
         source_hint = "education"
-
 
     # --------------------------------------------------------
     # SKILLS
@@ -405,12 +404,15 @@ def retrieve(
             "skills",
             "technology",
             "technologies",
+            "tech",
+            "tech stack",
             "programming",
+            "what can you do",
+            "what does subham know",
         ]
     ):
 
         source_hint = "skills"
-
 
     # --------------------------------------------------------
     # PROJECTS
@@ -423,11 +425,12 @@ def retrieve(
             "projects",
             "built",
             "developed",
+            "created",
+            "portfolio projects",
         ]
     ):
 
         source_hint = "projects"
-
 
     # --------------------------------------------------------
     # CERTIFICATES
@@ -437,16 +440,20 @@ def retrieve(
         word in query_lower
         for word in [
             "certificate",
+            "certificates",
             "certification",
             "certifications",
+            "certified",
+            "credential",
+            "credentials",
         ]
     ):
 
         source_hint = "certificates"
 
-
     # --------------------------------------------------------
     # PROJECT QUERIES
+    # Return ALL projects instead of only top-k.
     # --------------------------------------------------------
 
     if source_hint == "projects":
@@ -455,25 +462,49 @@ def retrieve(
             "project:"
         )
 
-        return results[:k]
-
+        return results
 
     # --------------------------------------------------------
     # SKILLS QUERIES
+    # Keep existing behavior, but do not limit to k.
     # --------------------------------------------------------
 
     if source_hint == "skills":
 
-       skill_results = get_all_source_documents("skills")
-       project_results = get_all_source_documents("project:")
-       custom_results = get_all_source_documents("custom:")
+        skill_results = get_all_source_documents(
+            "skills"
+        )
 
-       return (skill_results + project_results + custom_results)[:k]
+        project_results = get_all_source_documents(
+            "project:"
+        )
 
+        custom_results = get_all_source_documents(
+            "custom:"
+        )
+
+        return (
+            skill_results
+            + project_results
+            + custom_results
+        )
 
     # --------------------------------------------------------
+    # CERTIFICATE QUERIES
+    # Return ALL certificates instead of semantic top-k.
+    # --------------------------------------------------------
+
+    if source_hint == "certificates":
+
+        results = get_all_source_documents(
+            "certificates"
+        )
+
+        return results
+
+   
     # SEMANTIC RETRIEVAL
-    # --------------------------------------------------------
+   
 
     query_embedding = embed_query(
         query
@@ -483,7 +514,6 @@ def retrieve(
         k,
         collection.count(),
     )
-
 
     if source_hint:
 
@@ -506,7 +536,6 @@ def retrieve(
             n_results=n_results,
         )
 
-
     documents = result.get(
         "documents",
         [[]],
@@ -516,7 +545,6 @@ def retrieve(
         "metadatas",
         [[]],
     )[0]
-
 
     return [
         {
@@ -534,4 +562,3 @@ def retrieve(
             metadatas,
         )
     ]
-

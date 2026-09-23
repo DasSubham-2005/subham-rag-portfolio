@@ -79,14 +79,15 @@ def build_documents(db: Session):
         })
 
     for x in db.query(Certificate).all():
-        docs.append({
-            "id": f"certificate-{x.id}",
-            "source": "certificates",
-            "text": (
-                f"Certificate: {x.name}. "
-                f"Issuer: {x.issuer}. "
-                f"Issue date: {x.issue_date}. "
-                f"Credential: {x.credential_url}."
+       docs.append({
+           "id": f"certificate-{x.id}",
+           "source": "certificates",
+           "text": (
+              f"Certification: {x.name}. "
+              f"Issuing organization: {x.issuer}. "
+              f"Issue date: {x.issue_date}. "
+              f"Credential URL: {x.credential_url}. "
+              f"Certificate file: {x.file_url}."
             ),
         })
 

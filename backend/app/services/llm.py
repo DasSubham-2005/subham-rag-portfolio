@@ -22,26 +22,103 @@ Do NOT say:
 - "His projects..."
 - "He worked..."
 
-Answer ONLY from the supplied portfolio context.
-Never invent personal facts, skills, projects, dates, links, achievements, or contact details.
 
-If the requested information is not present in the supplied context, say:
+
+Answer ONLY from the supplied portfolio context.
+
+Never invent personal facts, skills, projects, dates, links,
+achievements, certifications, education, experience, or
+contact details.
+
+If the requested information is not present in the supplied
+context, say exactly:
+
 "I don't have that information in my portfolio knowledge base."
 
+
+
+If the visitor asks for a list of:
+
+- skills
+- technologies
+- projects
+- certifications
+- certificates
+- experience
+- education
+
+and the supplied context contains multiple records, include
+ALL relevant records available in the supplied context.
+
+Do NOT arbitrarily limit the answer to 5 items.
+
+Do NOT omit relevant records just because there are many.
+
+For list questions, use a clean bullet list.
+
+
+
+If the visitor asks about one specific project, skill,
+certificate, experience, or another specific topic, answer
+only with the relevant information available in the context.
+
+Do not dump unrelated portfolio information.
+
+
 Keep responses natural, conversational, concise, and professional.
+
+For projects, mention the project name and a short useful
+description. Mention technologies when available.
+
+For certifications, mention:
+- certification name
+- issuing organization
+- issue date
+- credential/link when available
+
+For skills, group or list the skills clearly.
+
+Do not expose internal RAG, database, embedding, retrieval,
+context, or system details to the visitor.
 """
 
 
 async def answer(question: str, context: list[dict]):
+
+    if not context:
+        return (
+            "I don't have that information in my "
+            "portfolio knowledge base."
+        )
+
     ctx = "\n\n".join(
         f"[{x['source']}] {x['text']}"
         for x in context
     )
 
-    prompt = f"{SYSTEM}\n\nCONTEXT:\n{ctx}\n\nQUESTION: {question}"
+    prompt = f"""
+{SYSTEM}
+
+PORTFOLIO CONTEXT:
+{ctx}
+
+VISITOR QUESTION:
+{question}
+
+Remember:
+- Answer only from the portfolio context.
+- For list questions, include ALL relevant records provided
+  in the context.
+- For specific questions, focus only on the requested topic.
+- Never invent missing information.
+"""
+
+
 
     if settings.groq_api_key:
+
         async with httpx.AsyncClient(timeout=30) as client:
+
             r = await client.post(
                 "https://api.groq.com/openai/v1/chat/completions",
                 headers={
@@ -60,15 +137,21 @@ async def answer(question: str, context: list[dict]):
             )
 
             if r.status_code == 429:
-               return (
-                  "I'm receiving a lot of questions right now. "
-                  "Please wait a moment and try again."
-               )
+                return (
+                    "I'm receiving a lot of questions right now. "
+                    "Please wait a moment and try again."
+                )
 
             r.raise_for_status()
+
             return r.json()["choices"][0]["message"]["content"]
+
+ 
+
     if settings.openai_api_key:
+
         async with httpx.AsyncClient(timeout=30) as client:
+
             r = await client.post(
                 "https://api.openai.com/v1/chat/completions",
                 headers={
@@ -86,14 +169,16 @@ async def answer(question: str, context: list[dict]):
                 }
             )
 
-        
-
             r.raise_for_status()
+
             return r.json()["choices"][0]["message"]["content"]
-        
+
+   
+
     return (
         "I found these relevant portfolio details:\n\n"
-        + "\n\n".join(x["text"] for x in context[:3])
-        if context
-        else "I don't have that information in my portfolio knowledge base."
+        + "\n\n".join(
+            x["text"]
+            for x in context
+        )
     )
