@@ -21,9 +21,7 @@ _rebuild_lock = threading.Lock()
 EMBEDDING_DIMENSION = 768
 
 
-# ============================================================
-# CHROMA
-# ============================================================
+
 
 def get_collection():
     global client, collection
@@ -63,9 +61,7 @@ def get_collection():
     return collection
 
 
-# ============================================================
-# LIGHTWEIGHT LOCAL EMBEDDINGS
-# ============================================================
+
 
 def local_embed(texts: list[str]):
     """
@@ -127,9 +123,7 @@ def embed_query(text: str):
     return local_embed([text])[0]
 
 
-# ============================================================
-# TEXT CHUNKING
-# ============================================================
+
 
 def chunk_text(
     text: str,
@@ -163,9 +157,6 @@ def chunk_text(
     return chunks
 
 
-# ============================================================
-# INDEX DOCUMENTS
-# ============================================================
 
 def index_documents(
     documents: list[dict],
@@ -221,9 +212,7 @@ def index_documents(
     return len(ids)
 
 
-# ============================================================
-# AUTOMATIC REBUILD
-# ============================================================
+
 
 def auto_rebuild_if_empty():
 
@@ -287,9 +276,7 @@ def auto_rebuild_if_empty():
             )
 
 
-# ============================================================
-# GET DOCUMENTS BY SOURCE
-# ============================================================
+
 
 def get_all_source_documents(
     source_prefix: str,
@@ -330,9 +317,7 @@ def get_all_source_documents(
     return results
 
 
-# ============================================================
-# RETRIEVAL
-# ============================================================
+
 
 def retrieve(
     query: str,
@@ -352,9 +337,7 @@ def retrieve(
 
     source_hint = None
 
-    # --------------------------------------------------------
-    # EXPERIENCE
-    # --------------------------------------------------------
+
 
     if any(
         word in query_lower
@@ -373,9 +356,7 @@ def retrieve(
 
         source_hint = "experience"
 
-    # --------------------------------------------------------
-    # EDUCATION
-    # --------------------------------------------------------
+    
 
     elif any(
         word in query_lower
@@ -393,9 +374,7 @@ def retrieve(
 
         source_hint = "education"
 
-    # --------------------------------------------------------
-    # SKILLS
-    # --------------------------------------------------------
+   
 
     elif any(
         word in query_lower
@@ -414,9 +393,7 @@ def retrieve(
 
         source_hint = "skills"
 
-    # --------------------------------------------------------
-    # PROJECTS
-    # --------------------------------------------------------
+    
 
     elif any(
         word in query_lower
@@ -432,9 +409,7 @@ def retrieve(
 
         source_hint = "projects"
 
-    # --------------------------------------------------------
-    # CERTIFICATES
-    # --------------------------------------------------------
+   
 
     elif any(
         word in query_lower
@@ -451,11 +426,7 @@ def retrieve(
 
         source_hint = "certificates"
 
-    # --------------------------------------------------------
-    # PROJECT QUERIES
-    # Return ALL projects instead of only top-k.
-    # --------------------------------------------------------
-
+    
     if source_hint == "projects":
 
         results = get_all_source_documents(
@@ -464,10 +435,7 @@ def retrieve(
 
         return results
 
-    # --------------------------------------------------------
-    # SKILLS QUERIES
-    # Keep existing behavior, but do not limit to k.
-    # --------------------------------------------------------
+  
 
     if source_hint == "skills":
 
@@ -489,10 +457,9 @@ def retrieve(
             + custom_results
         )
 
-    # --------------------------------------------------------
-    # CERTIFICATE QUERIES
-    # Return ALL certificates instead of semantic top-k.
-    # --------------------------------------------------------
+  
+  
+   
 
     if source_hint == "certificates":
 
@@ -503,7 +470,6 @@ def retrieve(
         return results
 
    
-    # SEMANTIC RETRIEVAL
    
 
     query_embedding = embed_query(

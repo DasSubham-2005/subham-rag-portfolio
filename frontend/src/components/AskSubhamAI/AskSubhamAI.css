@@ -77,22 +77,71 @@
   background: none;
   color: #89a3bd;
 }
-.ai-messages {
+/* .ai-messages {
   flex: 1;
   overflow: auto;
   padding: 16px;
   display: flex;
   flex-direction: column;
   gap: 12px;
+} */
+ .ai-messages {
+  flex: 1;
+  min-width: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
-.ai-msg {
+/* .ai-msg {
   max-width: 86%;
   padding: 12px 14px;
   border-radius: 15px;
   font-size: 13px;
   line-height: 1.55;
   white-space: pre-wrap;
+} */
+
+.ai-msg {
+  max-width: 86%;
+  min-width: 0;
+  padding: 12px 14px;
+  border-radius: 15px;
+  font-size: 13px;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  box-sizing: border-box;
 }
+
+.ai-msg a {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  word-break: break-all;
+}
+
+.ai-msg p {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.ai-msg ul,
+.ai-msg ol {
+  max-width: 100%;
+  padding-left: 20px;
+  box-sizing: border-box;
+}
+
+.ai-msg li {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
 .ai-msg.bot {
   background: #071d35;
   color: #c2dbf0;

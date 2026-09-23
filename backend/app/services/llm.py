@@ -1,5 +1,6 @@
 import httpx
 from app.core.config import settings
+import re
 
 
 SYSTEM = """You are Talk to Subham AI, the personal portfolio assistant for Subham Das.
@@ -64,6 +65,9 @@ only with the relevant information available in the context.
 
 Do not dump unrelated portfolio information.
 
+Do not use Markdown formatting.
+Do not use asterisks, bold text, headings, or bullet symbols.
+Write answers as clean plain text with simple line breaks.
 
 Keep responses natural, conversational, concise, and professional.
 
@@ -81,6 +85,13 @@ For skills, group or list the skills clearly.
 Do not expose internal RAG, database, embedding, retrieval,
 context, or system details to the visitor.
 """
+
+def clean_response(text: str) -> str:
+    text = re.sub(r"\*\*(.*?)\*\*", r"\1", text)
+    text = re.sub(r"(?<!\w)\*(?!\s)(.*?)(?<!\s)\*(?!\w)", r"\1", text)
+    text = re.sub(r"^\s*[-•]\s+", "", text, flags=re.MULTILINE)
+    text = re.sub(r"^\s*#+\s*", "", text, flags=re.MULTILINE)
+    return text.strip()
 
 
 async def answer(question: str, context: list[dict]):
@@ -144,7 +155,9 @@ Remember:
 
             r.raise_for_status()
 
-            return r.json()["choices"][0]["message"]["content"]
+            return clean_response(
+               r.json()["choices"][0]["message"]["content"]
+            )
 
  
 
@@ -171,7 +184,9 @@ Remember:
 
             r.raise_for_status()
 
-            return r.json()["choices"][0]["message"]["content"]
+            return clean_response(
+               r.json()["choices"][0]["message"]["content"]
+            )
 
    
 
