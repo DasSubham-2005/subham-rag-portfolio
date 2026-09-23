@@ -337,9 +337,24 @@ def retrieve(
 
     source_hint = None
 
-
-
     if any(
+        phrase in query_lower
+        for phrase in [
+        "who is subham",
+        "who is subham das",
+        "who are you",
+        "tell me about yourself",
+        "about yourself",
+        "about subham",
+        "about subham das",
+        "who is he",
+        "introduce yourself",
+        "introduction",
+        ]
+    ):
+        source_hint = "profile"
+
+    elif any(
         word in query_lower
         for word in [
             "experience",
@@ -426,6 +441,9 @@ def retrieve(
 
         source_hint = "certificates"
 
+
+    if source_hint == "profile":
+      return get_all_source_documents("profile")[:k]
     
     if source_hint == "projects":
 
