@@ -280,9 +280,13 @@ B.Tech Computer Science & Engineering student focused on building practical AI-p
 
 The project is continuously being improved with new AI, RAG, and portfolio capabilities.
 
-## 📄 License
+## ## 📄 License
 
-This project is licensed under the terms specified in the LICENSE file.
+Copyright © 2026 Subham Das. All rights reserved.
+
+This project and its contents are protected by copyright. No permission is granted to copy, modify, distribute, publish, sublicense, sell, or reuse the source code or other original materials without prior written permission from the copyright holder.
+
+For complete terms and permission requests, please refer to the [LICENSE](LICENSE) file.
 
 ## ⭐ Support
 
